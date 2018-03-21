@@ -11,7 +11,7 @@ class App extends Component {
     };
   }
   componentDidMount() {
-    fetch('/').then((res) => {
+    fetch('/test').then((res) => {
       const { user } = res;
       this.setState({ user });
     }).catch((err) => {

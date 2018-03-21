@@ -9,7 +9,7 @@ module.exports = {
             res.status(501).send(err.message);
             return;
         }
-        connection.query('SELECT col FROM test', function (err, results, fields) {
+        connection.query('SELECT user FROM users', function (err, results, fields) {
             if (err) {
                 res.status(501).send(err.message);
                 connection.release();
