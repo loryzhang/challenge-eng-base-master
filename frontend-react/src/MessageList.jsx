@@ -3,7 +3,11 @@ import Message from './Messsage';
 
 const MessageList = (props) => {
   const { messages } = props;
-  messages.map(message => <Message message={message} />);
+  return (
+    <div>
+      { messages.map(message => <Message message={message} />)}
+    </div>
+  );
 };
 
 export default MessageList;

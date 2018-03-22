@@ -7,7 +7,7 @@ class App extends Component {
     super();
     this.state = {
       user: '',
-      messages: [],
+      messages: [['hi lory']],
     };
   }
   componentDidMount() {
