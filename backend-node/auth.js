@@ -1,17 +1,47 @@
 //Handle user authentication
-
 const db = require('./db');
 
 module.exports = {
-  login: function(req, res) {
-    //Takes a username and, if the user doesn’t already exist it, saves it to the data store
-    res.end();
+  login: (req, res) => {
+    const { user } = req.body;
+    const query =  `SELECT user FROM users where user = '${user}'`;
+    db.getConnection((err, connection) => {
+      if (err) {
+          res.status(501).send(err.message);
+          return;
+      }
+      connection.query(query, (err, results) => {
+        if (err) {
+            console.log('err when query', query);
+            res.status(501).send(err.message);
+            connection.release();
+            return;
+        }
+        console.log('results', results);
+        if (!results.length) {
+          const addUser = `insert into users (user) value ('${user}')`;
+          connection.query(addUser, (err) => {
+            if (err) {
+              res.status(501).send(err.message);
+              connection.release();
+              return;
+            }
+            res.end();
+            connection.release();
+          });
+        } else {
+          res.end();
+          connection.release();
+        }
+        
+      });
+    });
   },
-  logout: function(req, res) {
+  logout: (req, res) => {
     // logout user, distroy session
     res.end();
   },
-  checkSession: function(req, res) {
+  checkSession: (req, res) => {
     // check if the user has a not expired session
     res.end();
   },

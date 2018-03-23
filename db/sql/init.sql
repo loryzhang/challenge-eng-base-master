@@ -13,4 +13,8 @@ CREATE TABLE messages(
   ts TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   primary key (id));
 
-INSERT INTO users 
+INSERT INTO users (user) value ('Lory');
+INSERT INTO users (user) value ('Alex');
+INSERT INTO users (user) value ('Gil');
+
+
