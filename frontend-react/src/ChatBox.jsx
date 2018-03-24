@@ -3,6 +3,7 @@ import SocketClient from 'socket.io-client';
 import MessageList from './MessageList';
 import MessageInput from './MessageInput';
 import UserList from './UserList';
+import { BACKEND_IP } from './constants';
 
 class ChatBox extends Component {
   constructor(props) {
@@ -11,7 +12,7 @@ class ChatBox extends Component {
       users: [],
       message: '',
       messages: [],
-      endpoint: 'http://localhost:8000',
+      endpoint: `${BACKEND_IP}`,
       err: null,
     };
     const { endpoint } = this.state;
@@ -19,7 +20,7 @@ class ChatBox extends Component {
     this.socket.on('connect', () => {
       console.log('connected client');
     });
-    this.socket.emit('addUser');
+    this.socket.emit('addUser', this.props.user);
     this.handleInput = this.handleInput.bind(this);
     this.getMessages = this.getMessages.bind(this);
     this.send = this.send.bind(this);

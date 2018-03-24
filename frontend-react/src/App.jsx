@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import axios from 'axios';
 import ChatBox from './ChatBox';
+import { BACKEND_IP } from './constants';
 
 class App extends Component {
   constructor() {
@@ -18,7 +19,7 @@ class App extends Component {
   verifyUser() {
     axios({
       method: 'post',
-      url: '/login',
+      url: `${BACKEND_IP}/login`,
       data: {
         user: this.state.userName,
       },
@@ -50,7 +51,7 @@ class App extends Component {
         { err && <div className="error">err</div> }
         { user ? <ChatBox user={userName} /> :
         <div className="login">
-          <input type="text" id="user" value={userName} onChange={this.handleChange} placeholder="please use your username to log in" />
+          <input type="text" id="user" value={userName} onChange={this.handleChange} placeholder="please use your user name to log in" />
           <button id="login" onClick={this.verifyUser}>Log In</button>
         </div>
         }

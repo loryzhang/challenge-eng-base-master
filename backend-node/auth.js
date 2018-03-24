@@ -3,6 +3,7 @@ const db = require('./db');
 
 module.exports = {
   login: (req, res) => {
+    // res.send({user: "Lory"});
     const { user } = req.body;
     const query =  `SELECT user FROM users where user = '${user}'`;
     db.getConnection((err, connection) => {

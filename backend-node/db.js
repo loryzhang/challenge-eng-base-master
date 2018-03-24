@@ -1,7 +1,7 @@
 const mysql = require('mysql');
 module.exports = mysql.createPool({
-  // host: 'db',
+  host: process.env.db || 'db',
   user: 'root',
-  // password: 'testpass',
+  password: process.env.dbpassword === '' ? '' : 'testpass',
   database: 'challenge',
 });

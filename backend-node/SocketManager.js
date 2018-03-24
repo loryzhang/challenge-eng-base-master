@@ -1,8 +1,22 @@
-const socketIo= require('./app').io;
+const redis = require('redis');
+const numUsers = 0;
 
 module.exports = (socket) => {
-  socket.on('addUser', () => {
-    console.log('add user');
+  let addedUser = false;
+  socket.on('addUser', (username) => {
+    console.log('adding user', username);
+    if (addedUser) return;
+    // we store the username in the socket session for this client
+    socket.username = username;
+    addedUser = true;
+    socket.emit('login', {
+      numUsers: numUsers
+    });
+    // echo globally (all clients) that a person has connected
+    socket.broadcast.emit('userJoined', {
+      username: socket.username,
+      numUsers: numUsers
+    });
   });
 
   socket.on('getUsers', () => {
