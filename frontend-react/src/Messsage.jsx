@@ -4,7 +4,7 @@ const Message = (props) => {
   const { text, user, ts } = props.message;
   return (
     <div>
-      <p><span>{user} </span><span>{ts} </span><span>{text} </span></p>
+      <p><span>@{ts} </span><span>{user}: </span><span>{text} </span></p>
     </div>
   );
 };

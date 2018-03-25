@@ -20,12 +20,11 @@ app.use(cors(corsOptions));
 io.set('heartbeat timeout', 8000);
 io.set('heartbeat interval', 4000);
 io.adapter(redisAdapter({host: process.env.redis || 'redis', port:6379}));
-
 io.of('/').adapter.clients((err, clients) => {
   console.log(clients);
 });
 io.on('connection', SocketManager);
-// app.use(express.static(path.join(__dirname, '/../frontend-react/public/')));
+
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 app.use(router);
@@ -33,5 +32,3 @@ app.use(router);
 server.listen(8000, function() {
     console.log('Listening on port 8000');
 });
-
-module.exports.io = io;

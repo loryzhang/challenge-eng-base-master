@@ -12,9 +12,9 @@ class App extends Component {
       err: null,
     };
     this.handleChange = this.handleChange.bind(this);
-    this.logOut = this.logOut.bind(this);
-    this.verifyUser = this.verifyUser.bind(this);
     this.handleEnter = this.handleEnter.bind(this);
+    this.verifyUser = this.verifyUser.bind(this);
+    this.logOut = this.logOut.bind(this);
   }
 
   verifyUser() {
@@ -25,8 +25,9 @@ class App extends Component {
         user: this.state.userName,
       },
     })
-      .then(() => {
-        this.setState({ user: true });
+      .then(({ data }) => {
+        const { pre_ts } = data;
+        this.setState({ pre_ts, user: true });
       })
       .catch((err) => {
         this.setState({
@@ -36,7 +37,12 @@ class App extends Component {
   }
 
   logOut() {
-    this.setState({ user: null });
+    this.setState({
+      userName: '',
+      user: null,
+      err: null,
+      pre_ts: null,
+    });
   }
 
   handleChange(e) {
@@ -52,10 +58,11 @@ class App extends Component {
   }
 
   render() {
-    const { user, err, userName } = this.state;
+    const { user, err, userName, pre_ts } = this.state;
     return (
       <div>
         { err && <div className="error">err</div> }
+        { pre_ts && <h3>last login time: {pre_ts} </h3>}
         { user ? <ChatBox user={userName} logOut={this.logOut} /> :
         <div className="login">
           <input type="text" id="user" value={userName} onKeyPress={this.handleEnter} onChange={this.handleChange} placeholder="please use your user name to log in" />

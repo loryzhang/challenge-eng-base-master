@@ -42,22 +42,13 @@ class ChatBox extends Component {
     });
 
     this.handleInput = this.handleInput.bind(this);
-    this.getMessages = this.getMessages.bind(this);
-    this.send = this.send.bind(this);
     this.handleLogOut = this.handleLogOut.bind(this);
+    this.send = this.send.bind(this);
   }
 
   componentDidMount() {
     this.socket.emit('addUser', this.props.user);
-    this.getUsers();
-    this.getMessages();
-  }
-
-  getUsers() {
     this.socket.emit('sendUsers', this.socket.id);
-  }
-
-  getMessages() {
     this.socket.emit('fetchMessages', 0, -1);
   }
 
@@ -75,6 +66,7 @@ class ChatBox extends Component {
 
   handleLogOut() {
     this.socket.emit('logout', this.props.user);
+    this.socket.disconnect();
     this.props.logOut();
   }
 
@@ -98,7 +90,12 @@ class ChatBox extends Component {
         { err && <p>{err}</p> }
         <button id="logout" onClick={this.handleLogOut}>Log Out</button>
         <UserList users={users} numUsers={numUsers} />
-        <MessageInput text={text} user={this.props.user} handleInput={this.handleInput} send={this.send} />
+        <MessageInput
+          text={text}
+          user={this.props.user}
+          handleInput={this.handleInput}
+          send={this.send}
+        />
         <MessageList messages={messages} />
       </div>
     );
