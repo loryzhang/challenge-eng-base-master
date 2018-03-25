@@ -14,6 +14,7 @@ class App extends Component {
     this.handleChange = this.handleChange.bind(this);
     this.logOut = this.logOut.bind(this);
     this.verifyUser = this.verifyUser.bind(this);
+    this.handleEnter = this.handleEnter.bind(this);
   }
 
   verifyUser() {
@@ -44,14 +45,20 @@ class App extends Component {
     });
   }
 
+  handleEnter(e) {
+    if (e.key === 'Enter') {
+      this.verifyUser();
+    }
+  }
+
   render() {
     const { user, err, userName } = this.state;
     return (
       <div>
         { err && <div className="error">err</div> }
-        { user ? <ChatBox user={userName} /> :
+        { user ? <ChatBox user={userName} logOut={this.logOut} /> :
         <div className="login">
-          <input type="text" id="user" value={userName} onChange={this.handleChange} placeholder="please use your user name to log in" />
+          <input type="text" id="user" value={userName} onKeyPress={this.handleEnter} onChange={this.handleChange} placeholder="please use your user name to log in" />
           <button id="login" onClick={this.verifyUser}>Log In</button>
         </div>
         }

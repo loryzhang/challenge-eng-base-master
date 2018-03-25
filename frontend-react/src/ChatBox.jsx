@@ -10,7 +10,7 @@ class ChatBox extends Component {
     super(props);
     this.state = {
       users: [],
-      message: '',
+      text: '',
       messages: [],
       endpoint: `${BACKEND_IP}`,
       err: null,
@@ -21,8 +21,8 @@ class ChatBox extends Component {
       console.log('connected client');
     });
 
-    this.socket.on('userJoined', ({ numUsers }) => {
-      this.setState({ numUsers });
+    this.socket.on('userJoined', (users, numUsers) => {
+      this.setState({ users, numUsers });
     });
     this.socket.on('getUsers', (users) => {
       this.setState({ users });
@@ -33,6 +33,11 @@ class ChatBox extends Component {
     this.socket.on('updateMessage', (message) => {
       this.setState({
         messages: [message, ...this.state.messages],
+      });
+    });
+    this.socket.on('removeUser', (username) => {
+      this.setState({
+        users: this.state.users.filter(user => user !== username),
       });
     });
 
@@ -57,8 +62,15 @@ class ChatBox extends Component {
   }
 
   send() {
-    const { message } = this.state;
+    if (!this.state.text.length) {
+      return;
+    }
+    const message = {
+      text: this.state.text,
+      user: this.props.user,
+    };
     this.socket.emit('sendMessage', message);
+    this.setState({ text: '' });
   }
 
   handleLogOut() {
@@ -69,12 +81,13 @@ class ChatBox extends Component {
   handleInput(e) {
     e.preventDefault();
     this.setState({
-      message: e.target.value,
+      text: e.target.value,
     });
   }
 
   render() {
     const {
+      text,
       numUsers,
       users,
       err,
@@ -85,7 +98,7 @@ class ChatBox extends Component {
         { err && <p>{err}</p> }
         <button id="logout" onClick={this.handleLogOut}>Log Out</button>
         <UserList users={users} numUsers={numUsers} />
-        <MessageInput user={this.props.user} handleInput={this.handleInput} send={this.send} />
+        <MessageInput text={text} user={this.props.user} handleInput={this.handleInput} send={this.send} />
         <MessageList messages={messages} />
       </div>
     );

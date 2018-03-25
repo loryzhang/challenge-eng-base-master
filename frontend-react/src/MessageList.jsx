@@ -3,9 +3,10 @@ import Message from './Messsage';
 
 const MessageList = (props) => {
   const { messages } = props;
+  console.log(messages);
   return (
     <div>
-      { messages.map(message => <Message message={message} />)}
+      { messages.map(message => <Message message={message} />) }
     </div>
   );
 };
