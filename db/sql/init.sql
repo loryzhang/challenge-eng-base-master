@@ -4,6 +4,7 @@ CREATE TABLE users(
   id int NOT NULL AUTO_INCREMENT,
   user varchar(100),
   ts TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  pre_ts TIMESTAMP DEFAULT CURRENT_TIMESTAMP, 
   primary key (id));
 
 CREATE TABLE messages(

@@ -1,36 +1,39 @@
 const redis = require('redis');
-const numUsers = 0;
+const bluebird = require('bluebird');
+
+const client = redis.createClient({host: process.env.redis || 'redis', port:6379});
+client.on('err', (err) => {
+  console.log(err);
+});
 
 module.exports = (socket) => {
-  let addedUser = false;
   socket.on('addUser', (username) => {
-    console.log('adding user', username);
-    if (addedUser) return;
-    // we store the username in the socket session for this client
-    socket.username = username;
-    addedUser = true;
-    socket.emit('login', {
-      numUsers: numUsers
-    });
-    // echo globally (all clients) that a person has connected
-    socket.broadcast.emit('userJoined', {
-      username: socket.username,
-      numUsers: numUsers
+    client.sadd('users', username);
+    client.scard('users', (err, numUsers) => {
+      socket.emit('userJoined', { numUsers });
+      socket.broadcast.emit('userJoined', { numUsers });
     });
   });
 
-  socket.on('getUsers', () => {
-    console.log('get users');
+  socket.on('sendUsers', (socketId) => {
+    const users = client.smembers('users', (err, users) => {
+      socket.emit('getUsers', users);
+    });
   });
-  socket.on('sendMessage', () => {
-    console.log('send message');
+  socket.on('sendMessage', (message) => {
+    client.lpush('messages', message, (err) => {
+      socket.emit('updateMessage', message);
+      socket.broadcast.emit('updateMessage', message);
+    });
   });
 
-  socket.on('fetchMessages', () => {
-    console.log('fetch messages');
+  socket.on('fetchMessages', (start, end) => {
+    client.lrange('messages', start, end, (err, messages) => {
+      socket.emit('receiveMsgs', messages);
+    });
   });
 
-  socket.on('logout', () => {
-
+  socket.on('logout', (username) => {
+    client.srem('users', username);
   });
 };
