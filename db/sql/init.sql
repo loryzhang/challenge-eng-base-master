@@ -14,6 +14,11 @@ CREATE TABLE messages(
   ts TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   primary key (id));
 
+CREATE TABLE room1(
+  id int NOT NULL AUTO_INCREMENT,
+  user varchar(100),
+  primary key (id));
+
 INSERT INTO users (user) value ('Lory');
 INSERT INTO users (user) value ('Alex');
 INSERT INTO users (user) value ('Gil');

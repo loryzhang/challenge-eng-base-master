@@ -1,10 +1,11 @@
 import React from 'react';
+import moment from 'moment';
 
 const Message = (props) => {
   const { text, user, ts } = props.message;
   return (
-    <div>
-      <p><span>@{ts} </span><span>{user}: </span><span>{text} </span></p>
+    <div className="message">
+      <p><span>{user} sent: <span>{text} </span></span><span className="ts">{moment(ts).fromNow()}</span></p>
     </div>
   );
 };

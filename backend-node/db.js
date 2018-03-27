@@ -63,10 +63,44 @@ module.exports = {
       connection.query(query, params, (err) => {
         if(err) {
           console.log(err);
-          connection.release();
         }
         connection.release();
       })
+    });
+  },
+  saveLoginToDb: (user, room) => {
+    db.getConnection((err, connection) => {
+      const query = 'insert into ? (user) value (?)';
+      const params = [ room, user ];
+      connection.query(query, params, (err) => {
+         if(err) {
+           console.log(err);
+         }
+         connection.release();
+      });
+    });
+  },
+
+  fetchUsersCache: (cb) => {
+    db.getConnection((err, connection) => {
+      connection.query('select user from users order by ts desc limit 3', (err, users) => {
+        if(err) {
+          console.log(err);
+        }
+        connection.release();
+        cb(users);
+      });
+    });
+  },
+  fetchMessagesCache: (cb)=> {
+    db.getConnection((err, connection) => {
+      connection.query('select * from messages order by ts desc limit 3', (err, messages) => {
+        if(err) {
+          console.log(err);
+        }
+        connection.release();
+        cb(messages);
+      });
     });
   },
 };

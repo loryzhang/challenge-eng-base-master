@@ -4,7 +4,7 @@ import Message from './Messsage';
 const MessageList = (props) => {
   const { messages } = props;
   return (
-    <div>
+    <div id="messageList">
       { messages.map(message => <Message message={message} />) }
     </div>
   );

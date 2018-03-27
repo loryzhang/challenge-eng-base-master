@@ -58,15 +58,23 @@ class App extends Component {
   }
 
   render() {
-    const { user, err, userName, pre_ts } = this.state;
+    const {
+      user,
+      err,
+      userName,
+      pre_ts,
+    } = this.state;
     return (
-      <div>
-        { err && <div className="error">err</div> }
-        { pre_ts && <h3>last login time: {pre_ts} </h3>}
+      <div id="app">
+        <div id="header">
+          <h3>Chatter Box</h3>
+          { err && <p className="err">{err}</p> }
+          { pre_ts && <p className="pre-ts">last login time: {pre_ts} </p> }
+        </div>
         { user ? <ChatBox user={userName} logOut={this.logOut} /> :
-        <div className="login">
-          <input type="text" id="user" value={userName} onKeyPress={this.handleEnter} onChange={this.handleChange} placeholder="please use your user name to log in" />
-          <button id="login" onClick={this.verifyUser}>Log In</button>
+        <div id="login">
+          <input className="input" type="text" id="user" value={userName} onKeyPress={this.handleEnter} onChange={this.handleChange} placeholder="Username" />
+          <button onClick={this.verifyUser}>Log In</button>
         </div>
         }
       </div>

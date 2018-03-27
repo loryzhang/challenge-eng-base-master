@@ -3,11 +3,11 @@ import React from 'react';
 const UserList = (props) => {
   const { users, numUsers } = props;
   return (
-    <div className="users">
+    <div id="sidebar">
       <h3>There are {numUsers} users online now!</h3>
-      <ol>
-        {users.map(user => <li>{user}</li>)}
-      </ol>
+      <ul id="userList">
+        {users.map(user => <li className="user">{user}</li>)}
+      </ul>
     </div>
   );
 };
