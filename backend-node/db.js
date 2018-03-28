@@ -42,22 +42,40 @@ module.exports = {
       });
     });
   },
+  checkMissedCountInDB: (pre_ts, callback) => {
+    console.log('called count in db');
+    db.getConnection((err, connection) => {
+      if (err) {
+        callback(err);
+        return;
+      }
+      console.log('incheckmisscountindb', JSON.stringify(pre_ts));
+      const missedCount = `select count(*) as missedCount from messages where ts > ${JSON.stringify(pre_ts)}`;
+      connection.query(missedCount, (err, result) => {
+        if(err) {
+          callback(err);
+          connection.release();
+          return;
+        }
+        callback(null, result);
+        connection.release();
+      });
+    });
+  },
   insertMessageToDb: ({ user, text, ts }) => {
     db.getConnection((err, connection) => {
-      const query = 'insert into messages (user, message, ts) values (?, ?, ?)';
+      const query = 'insert into messages (user, text, ts) values (?, ?, ?)';
       const params = [user, text, ts];
       connection.query(query, params, (err) => {
         if(err) {
           console.log(err);
-          connection.release();
         }
         connection.release();
       });
     });
   },
-  saveLogOutToDb: (user) => {
+  saveLogOutToDb: (user, pre_ts) => {
     db.getConnection((err, connection) => {
-      const pre_ts = new Date();
       const query = 'update users set pre_ts = ? where user = ?';
       const params = [ pre_ts, user ];
       connection.query(query, params, (err) => {
@@ -99,6 +117,7 @@ module.exports = {
           console.log(err);
         }
         connection.release();
+        console.log('fetchMessagesCache', messages);
         cb(messages);
       });
     });

@@ -10,7 +10,7 @@ CREATE TABLE users(
 CREATE TABLE messages(
   id int NOT NULL AUTO_INCREMENT,
   user varchar(100),
-  message varchar(255),
+  text varchar(255),
   ts TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   primary key (id));
 

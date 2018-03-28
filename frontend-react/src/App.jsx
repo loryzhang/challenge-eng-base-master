@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import axios from 'axios';
+import moment from 'moment';
 import ChatBox from './ChatBox';
 import { BACKEND_IP } from './constants';
 
@@ -9,6 +10,7 @@ class App extends Component {
     this.state = {
       userName: '',
       user: null,
+      missedCount: '',
       err: null,
     };
     this.handleChange = this.handleChange.bind(this);
@@ -26,8 +28,9 @@ class App extends Component {
       },
     })
       .then(({ data }) => {
-        const { pre_ts } = data;
-        this.setState({ pre_ts, user: true });
+        const { pre_ts, missedCount } = data;
+        console.log(moment(pre_ts).format(), missedCount);
+        this.setState({ pre_ts, missedCount, user: true });
       })
       .catch((err) => {
         this.setState({
@@ -62,6 +65,7 @@ class App extends Component {
       user,
       err,
       userName,
+      missedCount,
       pre_ts,
     } = this.state;
     return (
@@ -69,9 +73,12 @@ class App extends Component {
         <div id="header">
           <h3>Chatter Box</h3>
           { err && <p className="err">{err}</p> }
-          { pre_ts && <p className="pre-ts">last login time: {pre_ts} </p> }
         </div>
-        { user ? <ChatBox user={userName} logOut={this.logOut} /> :
+        { user ? <ChatBox user={userName}
+          missedCount={missedCount}
+          logOut={this.logOut}
+          pre_ts={pre_ts}
+        /> :
         <div id="login">
           <input className="input" type="text" id="user" value={userName} onKeyPress={this.handleEnter} onChange={this.handleChange} placeholder="Username" />
           <button onClick={this.verifyUser}>Log In</button>

@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import { ToastContainer, toast } from 'react-toastify';
+import moment from 'moment';
 import SocketClient from 'socket.io-client';
 import MessageList from './MessageList';
 import MessageInput from './MessageInput';
@@ -104,9 +105,12 @@ class ChatBox extends Component {
       users,
       messages,
     } = this.state;
+
+    const { missedCount, pre_ts } = this.props;
     return (
       <div id="chat-box">
         <h1>Welcome {this.props.user}!</h1>
+        { missedCount !== '0' && <p>{missedCount} messages since { moment(pre_ts) }</p>}
         <ToastContainer />
         <MessageInput
           className="row-1"
