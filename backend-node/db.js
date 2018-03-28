@@ -20,6 +20,7 @@ module.exports = {
           connection.release();
           return;
         }
+        console.log('inCheck', result[0]);
         callback(null, result);
         connection.release();
       });
@@ -48,8 +49,8 @@ module.exports = {
         callback(err);
         return;
       }
-      const missedCount = `select count(*) as missedCount from messages where UNIX_TIMESTAMP (ts) > ${JSON.stringify(pre_ts)}`;
-      connection.query(missedCount, (err, result) => {
+      const missedCount = 'select count(*) as missedCount from messages where UNIX_TIMESTAMP (ts) > ?';
+      connection.query(missedCount, [pre_ts], (err, result) => {
         if(err) {
           callback(err);
           connection.release();

@@ -2,6 +2,7 @@ const redis = require('redis');
 const { fetchUsersCache, fetchMessagesCache, checkMissedCountInDB } = require('./db');
 
 const client = redis.createClient({host: process.env.redis || 'redis', port:6379});
+
 const multiUsers = client.multi();
 const multiMsgs = client.multi();
 
@@ -43,14 +44,14 @@ fetchMessagesCache((err, messages) => {
 client.on('error', err => console.error(err));
 
 client.checkMissedCount = (pre_ts, callback) => {
-  client.lrange('messages', -50, -50, (err, msg) => {
+  client.lrange('messages', -10, -10, (err, msg) => {
     if(err) {
       return callback(err);
     }
     console.log('msg', msg);
     console.log(pre_ts);
     if(!err && msg.length && JSON.parse(msg[0]).ts > pre_ts) {
-      return callback(null, '50+');
+      return callback(null, '10+');
     }
     else {
       checkMissedCountInDB(pre_ts, (err, result) => {

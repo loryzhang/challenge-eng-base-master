@@ -109,11 +109,10 @@ class ChatBox extends Component {
 
     const { missedCount, pre_ts } = this.props;
     // setTimeout(this.render.bind(this), 1000);
-    console.log('hi', missedCount, new Date(pre_ts));
     return (
       <div id="chat-box">
         <h1>Welcome {this.props.user}!</h1>
-        { missedCount !== '0' && <p>{missedCount} messages since { moment(pre_ts).toString() }</p>}
+        { missedCount !== '0' && <p>{missedCount} messages since { moment(pre_ts*1000).toString() }</p>}
         <ToastContainer />
         <MessageInput
           className="row-1"

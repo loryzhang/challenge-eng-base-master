@@ -1,6 +1,6 @@
 const redis = require('./redis');
 const { insertMessageToDb, saveLogOutToDb } = require('./db');
-const LIMIT = 50;
+const LIMIT = 20;
 
 module.exports = (socket) => {
   socket.on('addUser', (username) => {
