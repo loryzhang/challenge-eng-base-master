@@ -15,15 +15,26 @@ class ChatBox extends Component {
       users: [],
       text: '',
       messages: [],
-      endpoint: `${BACKEND_IP}`,
       notice: '',
     };
-    const { endpoint } = this.state;
-    this.socket = SocketClient(endpoint);
+    this.socket = SocketClient(BACKEND_IP);
+    this.handleSocketEvents();
+    this.handleInput = this.handleInput.bind(this);
+    this.handleLogOut = this.handleLogOut.bind(this);
+    this.send = this.send.bind(this);
+    this.notify = this.notify.bind(this);
+  }
+
+  componentDidMount() {
+    this.socket.emit('addUser', this.state.user);
+    this.socket.emit('sendUsers');
+    this.socket.emit('fetchMessages');
+  }
+
+  handleSocketEvents() {
     this.socket.on('connect', () => {
       console.log('connected client');
     });
-
     this.socket.on('userJoined', (user, joined) => {
       if (!joined) {
         this.setState({
@@ -57,16 +68,6 @@ class ChatBox extends Component {
       });
       this.notify();
     });
-    this.handleInput = this.handleInput.bind(this);
-    this.handleLogOut = this.handleLogOut.bind(this);
-    this.send = this.send.bind(this);
-    this.notify = this.notify.bind(this);
-  }
-
-  componentDidMount() {
-    this.socket.emit('addUser', this.state.user);
-    this.socket.emit('sendUsers');
-    this.socket.emit('fetchMessages', 0, -1);
   }
 
   send() {
@@ -107,10 +108,12 @@ class ChatBox extends Component {
     } = this.state;
 
     const { missedCount, pre_ts } = this.props;
+    // setTimeout(this.render.bind(this), 1000);
+    console.log('hi', missedCount, new Date(pre_ts));
     return (
       <div id="chat-box">
         <h1>Welcome {this.props.user}!</h1>
-        { missedCount !== '0' && <p>{missedCount} messages since { moment(pre_ts) }</p>}
+        { missedCount !== '0' && <p>{missedCount} messages since { moment(pre_ts).toString() }</p>}
         <ToastContainer />
         <MessageInput
           className="row-1"

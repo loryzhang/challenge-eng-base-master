@@ -2,30 +2,55 @@ const redis = require('redis');
 const { fetchUsersCache, fetchMessagesCache, checkMissedCountInDB } = require('./db');
 
 const client = redis.createClient({host: process.env.redis || 'redis', port:6379});
+const multiUsers = client.multi();
+const multiMsgs = client.multi();
 
-fetchUsersCache(users => {
-  JSON.parse(JSON.stringify(users)).forEach(row => {
+client.flushall();
+
+fetchUsersCache((err, users) => {
+  if (err) {
+    console.error(err);
+    return;
+  }
+  Array.from(users).forEach(row => {
     const { user } = row;
-    client.sadd('users', user);
+    multiUsers.sadd('users', user);
   });
+  multiUsers.exec((err) => {
+    if(err) {
+      console.error(err);
+    }
+  })
 });
 
-fetchMessagesCache(messages => {
-  JSON.parse(JSON.stringify(messages)).forEach(message => {
-    console.log('incache', message, JSON.stringify(message));
-    client.lpush('messages', JSON.stringify(message));
+fetchMessagesCache((err, messages) => {
+  if (err) {
+    console.error(err);
+    return;
+  }
+
+  client.set('msgCounts', messages.length);
+  Array.from(messages).forEach(message => {
+    multiMsgs.lpush('messages', JSON.stringify(message));
   });
+  multiMsgs.exec((err) => {
+    if(err) {
+      console.error(err);
+    }
+  })
 });
 
-client.on('error', err => console.log(err));
+client.on('error', err => console.error(err));
 
 client.checkMissedCount = (pre_ts, callback) => {
-  client.lrange('messages', -100, -100, (err, msg) => {
+  client.lrange('messages', -50, -50, (err, msg) => {
     if(err) {
       return callback(err);
     }
+    console.log('msg', msg);
+    console.log(pre_ts);
     if(!err && msg.length && JSON.parse(msg[0]).ts > pre_ts) {
-      return callback(null, '100+');
+      return callback(null, '50+');
     }
     else {
       checkMissedCountInDB(pre_ts, (err, result) => {

@@ -18,14 +18,14 @@ router.post('/login', (req, res) => {
         }
       });
     } else {
+      console.log(result);
       let { pre_ts } = result[0];
-      cache.checkMissedCount(Date.parse(pre_ts), (err, result) => {
+      cache.checkMissedCount(pre_ts, (err, result) => {
         if(err) {
           res.status(501).send(err.message);
         } else {
           missedCount = result;
-          console.log('in router', pre_ts.toUTCString());
-          res.json({ missedCount, pre_ts: Date.parse(pre_ts) });
+          res.json({ missedCount, pre_ts });
         }
       });
     }

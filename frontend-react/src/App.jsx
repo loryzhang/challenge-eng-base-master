@@ -1,6 +1,5 @@
 import React, { Component } from 'react';
 import axios from 'axios';
-import moment from 'moment';
 import ChatBox from './ChatBox';
 import { BACKEND_IP } from './constants';
 
@@ -29,13 +28,10 @@ class App extends Component {
     })
       .then(({ data }) => {
         const { pre_ts, missedCount } = data;
-        console.log(moment(pre_ts).format(), missedCount);
         this.setState({ pre_ts, missedCount, user: true });
       })
       .catch((err) => {
-        this.setState({
-          err: err.toString(),
-        });
+        this.setState({ err: err.messages });
       });
   }
 
@@ -74,7 +70,8 @@ class App extends Component {
           <h3>Chatter Box</h3>
           { err && <p className="err">{err}</p> }
         </div>
-        { user ? <ChatBox user={userName}
+        { user ? <ChatBox
+          user={userName}
           missedCount={missedCount}
           logOut={this.logOut}
           pre_ts={pre_ts}
