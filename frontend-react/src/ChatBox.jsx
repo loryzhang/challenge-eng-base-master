@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import { ToastContainer, toast } from 'react-toastify';
 import moment from 'moment';
+import axios from 'axios';
 import SocketClient from 'socket.io-client';
 import MessageList from './MessageList';
 import MessageInput from './MessageInput';
@@ -16,6 +17,9 @@ class ChatBox extends Component {
       text: '',
       messages: [],
       notice: '',
+      hasMoreMessages: true,
+      missedCount: this.props.missedCount,
+      pre_ts: this.props.pre_ts,
     };
     this.socket = SocketClient(BACKEND_IP);
     this.handleSocketEvents();
@@ -23,9 +27,13 @@ class ChatBox extends Component {
     this.handleLogOut = this.handleLogOut.bind(this);
     this.send = this.send.bind(this);
     this.notify = this.notify.bind(this);
+    this.loadMore = this.loadMore.bind(this);
   }
 
   componentDidMount() {
+    if (this.state.missedCount !== '0') {
+      toast(`${this.state.missedCount} messages since ${moment(this.state.pre_ts * 1000).format('llll').toString()}`, { autoClose: false });
+    }
     this.socket.emit('addUser', this.state.user);
     this.socket.emit('sendUsers');
     this.socket.emit('fetchMessages');
@@ -94,8 +102,32 @@ class ChatBox extends Component {
       text: e.target.value,
     });
   }
+
   notify() {
     toast(this.state.notice, { autoClose: 1500 });
+  }
+
+  loadMore() {
+    if (!this.state.messages.length) {
+      return;
+    }
+    const oldestMsg = this.state.messages[this.state.messages.length - 1];
+    const oldestTs = oldestMsg.ts;
+    axios({
+      method: 'post',
+      url: `${BACKEND_IP}/loadMore`,
+      data: {
+        ts: oldestTs,
+      },
+    })
+      .then(({ data }) => {
+        const { moreMessages, hasMoreMessages } = data;
+        console.log(moreMessages, hasMoreMessages);
+        this.setState({ messages: this.state.messages.concat(moreMessages), hasMoreMessages });
+      })
+      .catch((err) => {
+        console.error(err);
+      });
   }
 
   render() {
@@ -105,14 +137,13 @@ class ChatBox extends Component {
       userLeaving,
       users,
       messages,
+      hasMoreMessages,
     } = this.state;
 
-    const { missedCount, pre_ts } = this.props;
-    // setTimeout(this.render.bind(this), 1000);
+    setTimeout(this.render.bind(this), 1000);
     return (
       <div id="chat-box">
         <h1>Welcome {this.props.user}!</h1>
-        { missedCount !== '0' && <p>{missedCount} messages since { moment(pre_ts*1000).toString() }</p>}
         <ToastContainer />
         <MessageInput
           className="row-1"
@@ -126,7 +157,11 @@ class ChatBox extends Component {
           numUsers={numUsers}
           userLeaving={userLeaving}
         />
-        <MessageList messages={messages} />
+        <MessageList
+          messages={messages}
+          hasMoreMessages={hasMoreMessages}
+          loadMore={this.loadMore}
+        />
       </div>
     );
   }

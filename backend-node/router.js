@@ -17,11 +17,11 @@ router.post('/login', (req, res) => {
           res.json({ missedCount, pre_ts: '' });
         }
       });
+  
     } else {
-      console.log(result);
       let { pre_ts } = result[0];
       cache.checkMissedCount(pre_ts, (err, result) => {
-        if(err) {
+        if (err) {
           res.status(501).send(err.message);
         } else {
           missedCount = result;
@@ -32,4 +32,19 @@ router.post('/login', (req, res) => {
   });
 });
 
+router.post('/loadMore', (req, res) => {
+  const { ts } = req.body;
+  db.loadMoreMessage(ts, (err, result) => {
+    if (err) {
+      res.status(501).send(err.message);
+    } else {
+      if (result.length === 0) {
+        console.log('result in router', result)
+        res.json({ moreMessages: [], hasMoreMessages: false});
+      } else {
+        res.json({ moreMessages: Array.from(result), hasMoreMessages: true })
+      }
+    }
+  });
+});
 module.exports = router;

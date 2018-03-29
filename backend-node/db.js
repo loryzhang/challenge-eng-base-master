@@ -4,6 +4,7 @@ const db = mysql.createPool({
   user: 'root',
   password: process.env.dbpassword === '' ? '' : 'testpass',
   database: 'challenge',
+  multipleStatements: true,
 });
 
 module.exports = {
@@ -13,15 +14,12 @@ module.exports = {
         callback(err);
         return;
       }
-      const query =  'SELECT UNIX_TIMESTAMP (pre_ts) as pre_ts FROM users where user = ?';
-      connection.query(query, [ user ], (err, result) => {
+      connection.query('update users set ts=UNIX_TIMESTAMP( NOW() ) where user=?; SELECT pre_ts FROM users where user = ?', [user, user], (err, result) => {
         if (err) {
           callback(err);
-          connection.release();
-          return;
+        } else {
+          callback(null, result);
         }
-        console.log('inCheck', result[0]);
-        callback(null, result);
         connection.release();
       });
     });
@@ -32,12 +30,11 @@ module.exports = {
         callback(err);
         return;
       }
-      const addUser = 'insert into users (user) value (?)';
-      connection.query(addUser, [ user ], (err) => {
+      connection.query('insert into users (user, ts) values (?, UNIX_TIMESTAMP( NOW() ))', [user], (err) => {
         if (err) {
           callback(err);
-          connection.release();
-          return;
+        } else {
+          callback(null);
         }
         connection.release();
       });
@@ -49,14 +46,12 @@ module.exports = {
         callback(err);
         return;
       }
-      const missedCount = 'select count(*) as missedCount from messages where UNIX_TIMESTAMP (ts) > ?';
-      connection.query(missedCount, [pre_ts], (err, result) => {
-        if(err) {
+      connection.query('select count(*) as missedCount from messages where ts > ?', [pre_ts], (err, result) => {
+        if (err) {
           callback(err);
-          connection.release();
-          return;
+        } else {
+          callback(null, result);
         }
-        callback(null, result);
         connection.release();
       });
     });
@@ -64,9 +59,7 @@ module.exports = {
   insertMessageToDb: (message, callback) => {
     const { user, text, ts } = message;
     db.getConnection((err, connection) => {
-      const query = 'insert into messages (user, text, ts) values (?, ?, ?)';
-      const params = [user, text, ts];
-      connection.query(query, params, (err) => {
+      connection.query('insert into messages (user, text, ts) values (?, ?, ?)', [user, text, ts], (err) => {
         if(err) {
           callback(err);
         } else {
@@ -78,9 +71,7 @@ module.exports = {
   },
   saveLogOutToDb: (user, pre_ts, callback) => {
     db.getConnection((err, connection) => {
-      const query = 'update users set pre_ts = ? where user = ?';
-      const params = [ pre_ts, user ];
-      connection.query(query, params, (err) => {
+      connection.query('update users set pre_ts = ? where user = ?', [pre_ts, user], (err) => {
         if(err) {
           callback(err);
         } else {
@@ -90,41 +81,41 @@ module.exports = {
       });
     });
   },
-  // saveLoginToDb: (user, room, callback) => {
-  //   db.getConnection((err, connection) => {
-  //     const query = 'insert into ? (user) value (?)';
-  //     const params = [ room, user ];
-  //     connection.query(query, params, (err) => {
-  //        if(err) {
-  //          callback(err);
-  //        } else {
-  //         callback(null);
-  //        }
-  //        connection.release();
-  //     });
-  //   });
-  // },
 
   fetchUsersCache: (callback) => {
     db.getConnection((err, connection) => {
-      connection.query('select user from users order by ts desc limit 50', (err, users) => {
+      connection.query('select user from users order by ts desc limit 200', (err, users) => {
         if(err) {
           callback(err);
-          return;
+        } else {
+          callback(null, users);
         }
         connection.release();
-        callback(null, users);
       });
     });
   },
   fetchMessagesCache: (callback)=> {
     db.getConnection((err, connection) => {
-      connection.query('select user, text, UNIX_TIMESTAMP (ts) as ts from messages order by ts asc limit 50', (err, messages) => {
+      connection.query('select user, text, ts from messages order by ts asc limit 200', (err, messages) => {
         if(err) {
           callback(err);
+        } else {
+          callback(null, messages);
         }
         connection.release();
-        callback(null, messages);
+      });
+    });
+  },
+  loadMoreMessage: (ts, callback) => {
+    db.getConnection((err, connection) => {
+      connection.query('select user, text, ts from messages where ts < ? order by ts asc limit 100', [ts], (err, messages) => {
+        if(err) {
+          callback(err);
+        } else {
+          console.log('mesgs', messages);
+          callback(null, messages);
+        }
+        connection.release();
       });
     });
   },

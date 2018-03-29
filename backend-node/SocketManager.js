@@ -1,6 +1,6 @@
 const redis = require('./redis');
 const { insertMessageToDb, saveLogOutToDb } = require('./db');
-const LIMIT = 20;
+const LIMIT = 200;
 
 module.exports = (socket) => {
   socket.on('addUser', (username) => {
@@ -45,7 +45,7 @@ module.exports = (socket) => {
     });
   });
   socket.on('sendMessage', (message) => {
-    message.ts = new Date();
+    message.ts = Math.floor(Date.now()/1000);
     redis.lpush('messages', JSON.stringify(message), (err) => {
       if(err) {
         console.error(err);
@@ -100,7 +100,7 @@ module.exports = (socket) => {
       }
     });
     socket.broadcast.emit('removeUser', socket.username);
-    const ts = new Date();
+    const ts = Math.floor(Date.now() / 1000);
     saveLogOutToDb(socket.username, ts, (err) => {
       if(err) {
         console.error(err);

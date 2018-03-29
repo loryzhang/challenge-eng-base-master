@@ -44,14 +44,12 @@ fetchMessagesCache((err, messages) => {
 client.on('error', err => console.error(err));
 
 client.checkMissedCount = (pre_ts, callback) => {
-  client.lrange('messages', -10, -10, (err, msg) => {
+  client.lrange('messages', -100, -100, (err, msg) => {
     if(err) {
       return callback(err);
     }
-    console.log('msg', msg);
-    console.log(pre_ts);
     if(!err && msg.length && JSON.parse(msg[0]).ts > pre_ts) {
-      return callback(null, '10+');
+      return callback(null, '100+');
     }
     else {
       checkMissedCountInDB(pre_ts, (err, result) => {
