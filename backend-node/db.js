@@ -96,11 +96,11 @@ module.exports = {
   },
   fetchMessagesCache: (callback)=> {
     db.getConnection((err, connection) => {
-      connection.query('select user, text, ts from messages order by ts asc limit 200', (err, messages) => {
+      connection.query('select user, text, ts from messages order by ts desc limit 200', (err, messages) => {
         if(err) {
           callback(err);
         } else {
-          callback(null, messages);
+          callback(null, messages.reverse());
         }
         connection.release();
       });
@@ -108,11 +108,11 @@ module.exports = {
   },
   loadMoreMessage: (ts, callback) => {
     db.getConnection((err, connection) => {
-      connection.query('select user, text, ts from messages where ts < ? order by ts asc limit 100', [ts], (err, messages) => {
+      connection.query('select user, text, ts from messages where ts < ? order by ts desc limit 100', [ts], (err, messages) => {
         if(err) {
           callback(err);
         } else {
-          console.log('mesgs', messages);
+          console.log('mesgs', messages, ts);
           callback(null, messages);
         }
         connection.release();

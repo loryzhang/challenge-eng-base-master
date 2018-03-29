@@ -3,6 +3,7 @@
 # dependencies
 /node_modules
 bundle.js
+backend-node/MOCK_DATA.csv
 
 # testing
 /coverage
