@@ -12,9 +12,8 @@ const MessageList = (props) => {
         hasMore={hasMoreMessages}
         loader={<div className="loader">Loading ...</div>}
       >
-        { messages.map((message, i) => <div><span>{i}</span><Message message={message}/></div>) }
+        { messages.map((message, i) => <div><span>{i}</span><Message message={message} /></div>) }
       </InfiniteScroll>
-      {/* <button id="loadMore" onClick={loadMore}>load more</button> */}
     </div>
   );
 };
