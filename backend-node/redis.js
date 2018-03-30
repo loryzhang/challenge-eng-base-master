@@ -1,5 +1,5 @@
 const redis = require('redis');
-const { fetchUsersCache, fetchMessagesCache, checkMissedCountInDB } = require('./db');
+const { fetchUsersFromDbToCache, fetchMessagesFromDbToCache, checkMissedMessagesCountInDB } = require('./db');
 
 const client = redis.createClient({host: process.env.redis || 'redis', port:6379});
 
@@ -8,7 +8,7 @@ const multiMsgs = client.multi();
 
 client.flushall();
 
-fetchUsersCache((err, users) => {
+fetchUsersFromDbToCache((err, users) => {
   if (err) {
     console.error(err);
     return;
@@ -24,12 +24,11 @@ fetchUsersCache((err, users) => {
   })
 });
 
-fetchMessagesCache((err, messages) => {
+fetchMessagesFromDbToCache((err, messages) => {
   if (err) {
     console.error(err);
     return;
   }
-
   client.set('msgCounts', messages.length);
   Array.from(messages).forEach(message => {
     multiMsgs.lpush('messages', JSON.stringify(message));
@@ -43,21 +42,20 @@ fetchMessagesCache((err, messages) => {
 
 client.on('error', err => console.error(err));
 
-client.checkMissedCount = (pre_ts, callback) => {
-  client.lrange('messages', -100, -100, (err, msg) => {
+client.checkMissedMessagesCountInCache = (pre_ts, callback) => {
+  client.lrange('messages', -100, -100, (err, message) => {
     if(err) {
       return callback(err);
     }
-    if(!err && msg.length && JSON.parse(msg[0]).ts > pre_ts) {
+    if(!err && message.length && JSON.parse(message[0]).ts > pre_ts) {
       return callback(null, '100+');
     }
     else {
-      checkMissedCountInDB(pre_ts, (err, result) => {
+      checkMissedMessagesCountInDB(pre_ts, (err, missedMessagesCount) => {
         if(err){
           return callback(err);   
         } else {
-          const { missedCount } = result[0];
-          return callback(null, missedCount.toString());
+          return callback(null, missedMessagesCount);
         }
       });
     }

@@ -1,59 +1,64 @@
-import React, { Component } from 'react';
 import { ToastContainer, toast } from 'react-toastify';
+import SocketClient from 'socket.io-client';
+import React, { Component } from 'react';
 import moment from 'moment';
 import axios from 'axios';
-import SocketClient from 'socket.io-client';
-import MessageList from './MessageList';
-import MessageInput from './MessageInput';
-import UserList from './UserList';
 import { BACKEND_IP } from './constants';
+import MessageInput from './MessageInput';
+import MessageList from './MessageList';
+import UserList from './UserList';
 
 class ChatBox extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      user: this.props.user,
       users: [],
       text: '',
       messages: [],
-      notice: '',
       hasMoreMessages: true,
-      missedCount: this.props.missedCount,
-      pre_ts: this.props.pre_ts,
     };
     this.socket = SocketClient(BACKEND_IP);
-    this.handleSocketEvents();
-    this.handleInput = this.handleInput.bind(this);
-    this.handleLogOut = this.handleLogOut.bind(this);
-    this.send = this.send.bind(this);
-    this.notify = this.notify.bind(this);
+    this.addSocketEventListener();
+    this.handleInputChange = this.handleInputChange.bind(this);
+    this.quitChatterBox = this.quitChatterBox.bind(this);
+    this.sendMessage = this.sendMessage.bind(this);
     this.loadMore = this.loadMore.bind(this);
   }
 
   componentDidMount() {
-    if (this.state.missedCount !== '' && this.state.missedCount !== '0') {
-      toast(`${this.state.missedCount} messages since ${moment(this.state.pre_ts * 1000).format('llll').toString()}`, { autoClose: false });
-    } else if (this.state.missedCount === '0') {
-      toast(`no new message since ${moment(this.state.pre_ts * 1000).format('llll').toString()}`, { autoClose: false });
+    if (this.props.missedMessagesCount && this.props.pre_ts) {
+      toast(`${this.props.missedMessagesCount} messages since ${moment(this.props.pre_ts * 1000).format('llll').toString()}`, { autoClose: false });
     }
-    this.socket.emit('addUser', this.state.user);
+    this.socket.emit('addUser', this.props.user);
     this.socket.emit('sendUsers');
     this.socket.emit('fetchMessages');
   }
 
-  handleSocketEvents() {
+  addSocketEventListener() {
     this.socket.on('connect', () => {
       console.log('connected client');
     });
-    this.socket.on('userJoined', (user, joined) => {
-      if (!joined) {
+    this.socket.on('userJoined', (user, alreadyJoined) => {
+      if (!alreadyJoined) {
         this.setState({
           users: [user, ...this.state.users],
           numUsers: this.state.numUsers += 1,
-          notice: `${user} just joined us!`,
         });
-        this.notify();
+        toast(`${user} just joined us!`, { autoClose: 1500 });
       }
+    });
+    this.socket.on('removeUser', (username) => {
+      // if the same user opened multple tabs for the same chat room
+      // then log out all the tabs
+      if (this.props.user === username) {
+        this.quitChatterBox();
+      }
+      this.setState({
+        users: this.state.users.filter(user => user !== username),
+        userLeaving: username,
+        numUsers: this.state.users.length,
+      });
+      toast(`${username} just left...`, { autoClose: 1500 });
     });
     this.socket.on('getUsers', (users) => {
       this.setState({ users, numUsers: users.length });
@@ -66,22 +71,11 @@ class ChatBox extends Component {
         messages: [message, ...this.state.messages],
       });
     });
-    this.socket.on('removeUser', (username) => {
-      if (this.state.user === username) {
-        this.handleLogOut();
-      }
-      this.setState({
-        users: this.state.users.filter(user => user !== username),
-        userLeaving: username,
-        numUsers: this.state.users.length,
-        notice: `${username} just left...`,
-      });
-      this.notify();
-    });
   }
 
-  send() {
+  sendMessage() {
     if (!this.state.text.length) {
+      // no event will be triggered if the input is empty
       return;
     }
     const message = {
@@ -92,39 +86,33 @@ class ChatBox extends Component {
     this.setState({ text: '' });
   }
 
-  handleLogOut() {
+  quitChatterBox() {
     this.socket.emit('disconnect', this.props.user);
     this.socket.disconnect();
-    this.props.logOut();
+    this.props.handleLogOut();
   }
 
-  handleInput(e) {
-    e.preventDefault();
+  handleInputChange(e) {
     this.setState({
       text: e.target.value,
     });
-  }
-
-  notify() {
-    toast(this.state.notice, { autoClose: 1500 });
   }
 
   loadMore() {
     if (!this.state.messages.length) {
       return;
     }
-    const oldestMsg = this.state.messages[this.state.messages.length - 1];
-    const oldestTs = oldestMsg.ts;
+    const earliestMessageInState = this.state.messages[this.state.messages.length - 1];
+    const earliestMessageTS = earliestMessageInState.ts;
     axios({
       method: 'post',
       url: `${BACKEND_IP}/loadMore`,
       data: {
-        ts: oldestTs,
+        ts: earliestMessageTS,
       },
     })
       .then(({ data }) => {
         const { moreMessages, hasMoreMessages } = data;
-        console.log(moreMessages, hasMoreMessages);
         this.setState({ messages: this.state.messages.concat(moreMessages), hasMoreMessages });
       })
       .catch((err) => {
@@ -144,19 +132,18 @@ class ChatBox extends Component {
 
     return (
       <div id="chat-box">
-        <h1>Welcome {this.props.user}!</h1>
         <ToastContainer />
         <MessageInput
           className="row-1"
           text={text}
-          handleInput={this.handleInput}
-          handleLogOut={this.handleLogOut}
-          send={this.send}
+          handleInputChange={this.handleInputChange}
+          sendMessage={this.sendMessage}
         />
         <UserList
           users={users}
           numUsers={numUsers}
           userLeaving={userLeaving}
+          quitChatterBox={this.quitChatterBox}
         />
         <MessageList
           messages={messages}

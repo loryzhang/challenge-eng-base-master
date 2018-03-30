@@ -1,12 +1,11 @@
 import React from 'react';
 
 const MessageInput = (props) => {
-  const { text, send, handleInput, handleLogOut } = props;
+  const { text, sendMessage, handleInputChange } = props;
   return (
     <div id="messageInput">
-      <input name="text" value={text} onKeyPress={(e) => { if (e.key === 'Enter') { send(); } }} onChange={handleInput} />
-      <button onClick={send}>Send</button>
-      <button id="logout" onClick={handleLogOut}>Log Out</button>
+      <input name="text" value={text} onKeyPress={(e) => { if (e.key === 'Enter') { sendMessage(); } }} onChange={handleInputChange} />
+      <button onClick={sendMessage}>Send</button>
     </div>
   );
 };

@@ -8,7 +8,7 @@ const db = mysql.createPool({
 });
 
 module.exports = {
-  checkUser: (user, callback) => {
+  getUserPreLogoutTS: (user, callback) => {
     db.getConnection((err, connection) => {
       if (err) {
         callback(err);
@@ -19,7 +19,12 @@ module.exports = {
           callback(err);
         } else {
           console.log('indb', result);
-          callback(null, result);
+          if(!result[1].length) {
+            callback(null, null);
+          } else {
+            const { pre_ts } = result[1][0];
+            callback(null, pre_ts);
+          }   
         }
         connection.release();
       });
@@ -41,17 +46,18 @@ module.exports = {
       });
     });
   },
-  checkMissedCountInDB: (pre_ts, callback) => {
+  checkMissedMessagesCountInDB: (pre_ts, callback) => {
     db.getConnection((err, connection) => {
       if (err) {
         callback(err);
         return;
       }
-      connection.query('select count(*) as missedCount from messages where ts > ?', [pre_ts], (err, result) => {
+      connection.query('select count(*) as missedMessagesCount from messages where ts > ?', [pre_ts], (err, result) => {
         if (err) {
           callback(err);
         } else {
-          callback(null, result);
+          const { missedMessagesCount } = result[0];
+          callback(null, missedMessagesCount);
         }
         connection.release();
       });
@@ -83,9 +89,9 @@ module.exports = {
     });
   },
 
-  fetchUsersCache: (callback) => {
+  fetchUsersFromDbToCache: (callback) => {
     db.getConnection((err, connection) => {
-      connection.query('select user from users order by ts desc limit 200', (err, users) => {
+      connection.query('select user from users where ts > pre_ts limit 200', (err, users) => {
         if(err) {
           callback(err);
         } else {
@@ -95,7 +101,7 @@ module.exports = {
       });
     });
   },
-  fetchMessagesCache: (callback)=> {
+  fetchMessagesFromDbToCache: (callback)=> {
     db.getConnection((err, connection) => {
       connection.query('select user, text, ts from messages order by ts desc limit 200', (err, messages) => {
         if(err) {

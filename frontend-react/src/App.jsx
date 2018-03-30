@@ -1,5 +1,5 @@
-import React, { Component } from 'react';
 import axios from 'axios';
+import React, { Component } from 'react';
 import ChatBox from './ChatBox';
 import { BACKEND_IP } from './constants';
 
@@ -8,14 +8,15 @@ class App extends Component {
     super();
     this.state = {
       userName: '',
-      user: null,
-      missedCount: '',
+      existedUser: null,
+      newUser: null,
+      missedMessagesCount: '',
       err: null,
     };
-    this.handleChange = this.handleChange.bind(this);
-    this.handleEnter = this.handleEnter.bind(this);
+    this.handleInputChange = this.handleInputChange.bind(this);
+    this.pressEnterToLogin = this.pressEnterToLogin.bind(this);
     this.verifyUser = this.verifyUser.bind(this);
-    this.logOut = this.logOut.bind(this);
+    this.handleLogOut = this.handleLogOut.bind(this);
   }
 
   verifyUser() {
@@ -27,30 +28,38 @@ class App extends Component {
       },
     })
       .then(({ data }) => {
-        const { pre_ts, missedCount } = data;
-        this.setState({ pre_ts, missedCount, user: true });
+        if (data.newUser) {
+          this.setState({ newUser: true });
+        } else if (data.pre_ts && data.missedMessagesCount !== undefined) {
+          this.setState({
+            pre_ts: data.pre_ts,
+            missedMessagesCount: data.missedMessagesCount,
+            existedUser: true,
+          });
+        }
       })
       .catch((err) => {
         this.setState({ err: err.messages });
       });
   }
 
-  logOut() {
+  handleLogOut() {
     this.setState({
       userName: '',
-      user: null,
+      existedUser: null,
+      newUser: null,
       err: null,
       pre_ts: null,
     });
   }
 
-  handleChange(e) {
+  handleInputChange(e) {
     this.setState({
       userName: e.target.value,
     });
   }
 
-  handleEnter(e) {
+  pressEnterToLogin(e) {
     if (e.key === 'Enter') {
       this.verifyUser();
     }
@@ -58,10 +67,11 @@ class App extends Component {
 
   render() {
     const {
-      user,
+      newUser,
+      existedUser,
       err,
       userName,
-      missedCount,
+      missedMessagesCount,
       pre_ts,
     } = this.state;
     return (
@@ -69,15 +79,17 @@ class App extends Component {
         <div id="header">
           <h3>Chatter Box</h3>
           { err && <p className="err">{err}</p> }
+          { newUser && <p>Welcome {userName}!</p> }
+          { existedUser && <p>Welcome back, {userName}!</p> }
         </div>
-        { user ? <ChatBox
+        { newUser || existedUser ? <ChatBox
           user={userName}
-          missedCount={missedCount}
-          logOut={this.logOut}
+          missedMessagesCount={missedMessagesCount}
+          handleLogOut={this.handleLogOut}
           pre_ts={pre_ts}
         /> :
         <div id="login">
-          <input className="input" type="text" id="user" value={userName} onKeyPress={this.handleEnter} onChange={this.handleChange} placeholder="Username" />
+          <input className="input" type="text" id="user" value={userName} onKeyPress={this.pressEnterToLogin} onChange={this.handleInputChange} placeholder="Username" />
           <button onClick={this.verifyUser}>Log In</button>
         </div>
         }

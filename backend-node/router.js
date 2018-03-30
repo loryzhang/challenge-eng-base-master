@@ -4,32 +4,29 @@ const cache = require('./redis');
 
 router.post('/login', (req, res) => {
   const { user } = req.body;
-  let missedCount = '';
-  db.checkUser(user, (err, result) => {
+  db.getUserPreLogoutTS(user, (err, pre_ts) => {
     if (err) {
       res.status(501).send(err.message);
-    } 
-    
-    if (!result[1].length) {
-      console.log('router', result[1]);
+    }
+    if (!pre_ts) {
+      console.log('router', pre_ts);
       db.addUser(user, (err) => {
         if (err) {
           res.status(501).send(err.message);
         } else {
-          res.json({ missedCount, pre_ts: '' });
+          res.json({ newUser: true });
         }
       });
   
     } else {
-      let { pre_ts } = result[1][0];
+      // let { pre_ts } = result[1][0];
       console.log(pre_ts, Date.now()/1000);
-      cache.checkMissedCount(pre_ts, (err, result) => {
+      cache.checkMissedMessagesCountInCache(pre_ts, (err, missedMessagesCount) => {
         if (err) {
           res.status(501).send(err.message);
         } else {
-          missedCount = result;
-          console.log('missed', missedCount);
-          res.json({ missedCount, pre_ts });
+          console.log('missed', missedMessagesCount);
+          res.json({ missedMessagesCount, pre_ts });
         }
       });
     }

@@ -1,40 +1,26 @@
 const redis = require('./redis');
 const { insertMessageToDb, saveLogOutToDb } = require('./db');
-const LIMIT = 200;
+const LIMIT = 200; // message limit in cache
 
 module.exports = (socket) => {
+
   socket.on('addUser', (username) => {
     socket.username = username;
-    redis.scard('users', (err, counts) => {
+    redis.sismember('users', username, (err, joined) => {
       if(err) {
         console.error(err);
         return;
       }
-      if(counts === LIMIT) {
-        redis.spop('users', (err) => {
-          if(err) {
-            console.error(err);
-            return;
-          } else {
-            redis.sismember('users', username, (err, joined) => {
-              if(err) {
-                console.error(err);
-                return;
-              }
-              redis.sadd('users', username, (err) => {
-                if(err) {
-                  console.error(err);
-                  return;
-                }
-              });
-              socket.broadcast.emit('userJoined', username, joined);
-            });
-          }
-        });
-      }
+      redis.sadd('users', username, (err) => {
+        if(err) {
+          console.error(err);
+          return;
+        }
+      });
+      socket.broadcast.emit('userJoined', username, joined);
     });
-    
   });
+
   socket.on('sendUsers', () => {
     redis.smembers('users', (err, users) => {
       if(err) {
@@ -44,6 +30,7 @@ module.exports = (socket) => {
       socket.emit('getUsers', users);
     });
   });
+
   socket.on('sendMessage', (message) => {
     message.ts = Math.floor(Date.now()/1000);
     redis.lpush('messages', JSON.stringify(message), (err) => {
@@ -56,8 +43,8 @@ module.exports = (socket) => {
           console.error(err);
           return;
         }
+        // mantaining massage limit in cache
         if (counts >= LIMIT) {
-          console.log('inrpop')
           redis.rpop('messages', (err) => {
             if(err) {
               console.error(err);
@@ -82,6 +69,7 @@ module.exports = (socket) => {
       }
     });
   });
+
   socket.on('fetchMessages', () => {
     redis.lrange('messages', 0, -1, (err, messages) => {
       if(err) {
@@ -92,6 +80,7 @@ module.exports = (socket) => {
       socket.emit('receiveMsgs', pasedMsgs);
     });
   });
+
   socket.on('disconnect', () => {
     redis.srem('users', socket.username, (err) => {
       if(err) {
