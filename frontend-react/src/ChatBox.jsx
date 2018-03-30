@@ -31,8 +31,10 @@ class ChatBox extends Component {
   }
 
   componentDidMount() {
-    if (this.state.missedCount !== '0') {
+    if (this.state.missedCount !== '' && this.state.missedCount !== '0') {
       toast(`${this.state.missedCount} messages since ${moment(this.state.pre_ts * 1000).format('llll').toString()}`, { autoClose: false });
+    } else if (this.state.missedCount === '0') {
+      toast(`no new message since ${moment(this.state.pre_ts * 1000).format('llll').toString()}`, { autoClose: false });
     }
     this.socket.emit('addUser', this.state.user);
     this.socket.emit('sendUsers');
@@ -140,7 +142,6 @@ class ChatBox extends Component {
       hasMoreMessages,
     } = this.state;
 
-    setTimeout(this.render.bind(this), 1000);
     return (
       <div id="chat-box">
         <h1>Welcome {this.props.user}!</h1>

@@ -9,7 +9,9 @@ router.post('/login', (req, res) => {
     if (err) {
       res.status(501).send(err.message);
     } 
-    if (result && !result.length) {
+    
+    if (!result[1].length) {
+      console.log('router', result[1]);
       db.addUser(user, (err) => {
         if (err) {
           res.status(501).send(err.message);
@@ -19,12 +21,14 @@ router.post('/login', (req, res) => {
       });
   
     } else {
-      let { pre_ts } = result[0];
+      let { pre_ts } = result[1][0];
+      console.log(pre_ts, Date.now()/1000);
       cache.checkMissedCount(pre_ts, (err, result) => {
         if (err) {
           res.status(501).send(err.message);
         } else {
           missedCount = result;
+          console.log('missed', missedCount);
           res.json({ missedCount, pre_ts });
         }
       });

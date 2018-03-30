@@ -18,6 +18,7 @@ module.exports = {
         if (err) {
           callback(err);
         } else {
+          console.log('indb', result);
           callback(null, result);
         }
         connection.release();
