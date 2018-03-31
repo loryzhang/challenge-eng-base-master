@@ -23,15 +23,23 @@ class ChatBox extends Component {
     this.quitChatterBox = this.quitChatterBox.bind(this);
     this.sendMessage = this.sendMessage.bind(this);
     this.loadMore = this.loadMore.bind(this);
+    // In case of server restart
+    setInterval(() => {
+      this.socket.emit('pingUser', this.props.user);
+    }, 1000);
   }
 
   componentDidMount() {
-    if (this.props.missedMessagesCount && this.props.pre_ts) {
-      toast(`${this.props.missedMessagesCount} messages since ${moment(this.props.pre_ts * 1000).format('llll').toString()}`, { autoClose: false });
+    if (this.props.missedMessagesCount && this.props.logout_ts) {
+      toast(`${this.props.missedMessagesCount} messages since ${moment(this.props.logout_ts * 1000).format('llll').toString()}`, { autoClose: false });
     }
     this.socket.emit('addUser', this.props.user);
     this.socket.emit('sendUsers');
     this.socket.emit('fetchMessages');
+  }
+
+  componentWillUnmount() {
+    clearInterval(this.interval);
   }
 
   addSocketEventListener() {
@@ -40,9 +48,12 @@ class ChatBox extends Component {
     });
     this.socket.on('userJoined', (user, alreadyJoined) => {
       if (!alreadyJoined) {
-        this.setState({
-          users: [user, ...this.state.users],
-          numUsers: this.state.numUsers += 1,
+        this.setState((prevState) => {
+          const { numUsers, users } = prevState;
+          return {
+            users: [user, ...users],
+            numUsers: numUsers + 1,
+          };
         });
         toast(`${user} just joined us!`, { autoClose: 1500 });
       }
@@ -53,10 +64,14 @@ class ChatBox extends Component {
       if (this.props.user === username) {
         this.quitChatterBox();
       }
-      this.setState({
-        users: this.state.users.filter(user => user !== username),
-        userLeaving: username,
-        numUsers: this.state.users.length,
+      this.setState((prevState) => {
+        const users = prevState.users.filter(user => user !== username);
+        const numUsers = users.length;
+        return {
+          users,
+          numUsers,
+          userLeaving: username,
+        }
       });
       toast(`${username} just left...`, { autoClose: 1500 });
     });

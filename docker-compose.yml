@@ -1,7 +1,7 @@
 version: '3'
 
 services:
-    nginx:
+    nginix:
         build: nginx
         links:
             - fullstack
@@ -31,7 +31,7 @@ services:
         ports:
             - "13000:3000"
     redis:
-        image: redis:alpine
+        image: redis
         ports:
             - "6379:6379"
 

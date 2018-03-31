@@ -1,33 +1,42 @@
-const express = require('express');
+const session = require("express-session");
 const bodyParser = require('body-parser');
-const router = require('./router');
-const path = require('path');
-const SocketManager = require('./SocketManager');
 const socketIO = require('socket.io');
-// const redisAdapter = require('socket.io-redis');
-const cors = require('cors');
+const express = require('express');
+const path = require('path');
+// const cors = require('cors');
+// const RedisStore = require('connect-redis')(session);
+const SocketManager = require('./SocketManager');
+const router = require('./router');
+const { CORS_ORIGIN, EXPRESS_PORT, REDIS_HOST, REDIS_PORT, HEARTBEAT_TIMEOUT, HEARTBEAT_INTERVAL } = require('./constants');
+// const client = require('redis').createClient({ host: REDIS_HOST, port:REDIS_PORT });
 
-const corsOptions = {
-  origin: 'http://localhost:3000',
-  optionsSuccessStatus: 200 // some legacy browsers (IE11, various SmartTVs) choke on 204     
-}
+// const corsOptions = {
+//   origin: CORS_ORIGIN,
+//   optionsSuccessStatus: 200 // some legacy browsers (IE11, various SmartTVs) choke on 204   
+// }
+
 const app = express();
 const server = require('http').createServer(app);
 const io = socketIO(server);
 
-app.use(cors(corsOptions));
-io.set('heartbeat timeout', 8000);
-io.set('heartbeat interval', 4000);
-// io.adapter(redisAdapter({host: process.env.redis || 'redis', port:6379}));
-// io.of('/').adapter.clients((err, clients) => {
-//   console.log(clients);
-// });
+// app.use(cors(corsOptions));
+app.use(session({
+  // store: new RedisStore({client: client}),
+  secret: 'chatterbox',
+  saveUninitialized: true,
+  resave: false,
+  cookie: { secure: true },
+}));
+
+
+io.set('heartbeat timeout', HEARTBEAT_TIMEOUT);
+io.set('heartbeat interval', HEARTBEAT_INTERVAL);
 io.on('connection', SocketManager);
 
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 app.use(router);
 
-server.listen(8000, function() {
-    console.log('Listening on port 8000');
+server.listen(EXPRESS_PORT, function() {
+    console.log(`Listening on port ${EXPRESS_PORT}`);
 });

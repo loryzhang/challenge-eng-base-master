@@ -1,11 +1,11 @@
 const redis = require('./redis');
 const { insertMessageToDb, saveLogOutToDb } = require('./db');
-const LIMIT = 200; // message limit in cache
+const { MESSAGE_LIMIT_IN_CACHE } = require('./constants');
 
 module.exports = (socket) => {
 
   socket.on('addUser', (username) => {
-    socket.username = username;
+    socket.user = username;
     redis.sismember('users', username, (err, joined) => {
       if(err) {
         console.error(err);
@@ -38,13 +38,13 @@ module.exports = (socket) => {
         console.error(err);
         return;
       }
-      redis.get('msgCounts', (err, counts) => {
+      redis.get('messageCountInCache', (err, counts) => {
         if(err) {
           console.error(err);
           return;
         }
         // mantaining massage limit in cache
-        if (counts >= LIMIT) {
+        if (counts >= MESSAGE_LIMIT_IN_CACHE) {
           redis.rpop('messages', (err) => {
             if(err) {
               console.error(err);
@@ -52,7 +52,7 @@ module.exports = (socket) => {
             }
           })
         } else {
-          redis.incr('msgCounts', (err) => {
+          redis.incr('messageCountInCache', (err) => {
             if(err) {
               console.error(err);
               return;
@@ -81,16 +81,21 @@ module.exports = (socket) => {
     });
   });
 
+  socket.on('pingUser', (user) => {
+    socket.user = user;
+  });
+
   socket.on('disconnect', () => {
-    redis.srem('users', socket.username, (err) => {
+    console.log('when disconnect', socket.user);
+    redis.srem('users', socket.user, (err) => {
       if(err) {
         console.error(err);
         return;
       }
     });
-    socket.broadcast.emit('removeUser', socket.username);
-    const ts = Math.floor(Date.now() / 1000);
-    saveLogOutToDb(socket.username, ts, (err) => {
+    socket.broadcast.emit('removeUser', socket.user);
+    const logout_ts = Math.floor(Date.now() / 1000);
+    saveLogOutToDb(socket.user, logout_ts, (err) => {
       if(err) {
         console.error(err);
       }

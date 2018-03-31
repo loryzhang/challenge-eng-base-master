@@ -26,17 +26,15 @@ fs.readFile(path.join(__dirname, '/MOCK_DATA.csv'), 'utf8', (err, data) => {
   const asyncAddUsers = async() => {
     const uniqUsers = new Set();
     mockData.forEach(rows => uniqUsers.add(rows.user));
-    const uniqRows = mockData.filter(rows => uniqUsers.has(rows.user));
-
+    const uniqRows = Array.from(uniqUsers);
+    
     while (uniqRows.length) {
-      const row = uniqRows.pop();
-      if (isNaN(row.ts)) {
-        continue;
-      }
-      const login_ts = row.ts - Math.floor(Math.random() * 1000);
+      const user = uniqRows.pop();
+      const row_ts = Math.floor(Date.now()/1000) - Math.floor(Math.random() * 1000);
+      const login_ts = row_ts - Math.floor(Math.random() * 1000);
       const logout_ts = login_ts - Math.floor(Math.random() * 10000)
-      const eachAddUser = await query('insert into users (user, ts, pre_ts) values (?, ?, ?)', [row.user, login_ts, logout_ts]);
-      console.log(row, 'done!');
+      const eachAddUser = await query('insert into users (user, login_ts, logout_ts) values (?, ?, ?)', [user, login_ts, logout_ts]);
+      console.log(user, 'done!');
     } 
   }
 

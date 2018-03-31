@@ -13,16 +13,36 @@ class App extends Component {
       missedMessagesCount: '',
       err: null,
     };
+
     this.handleInputChange = this.handleInputChange.bind(this);
     this.pressEnterToLogin = this.pressEnterToLogin.bind(this);
     this.verifyUser = this.verifyUser.bind(this);
     this.handleLogOut = this.handleLogOut.bind(this);
   }
 
+  componentDidMount() {
+    axios('/checkSession')
+      .then((result) => {
+        console.log('hi', result);
+        this.setState({ userName: result.data.user })
+        // const { user, logout_ts, missedMessagesCount } = data;
+        // this.setState({
+        //   userName: user,
+        //   logout_ts,
+        //   missedMessagesCount,
+        //   existedUser: true,
+        // });
+      })
+      .catch((err) => {
+        console.log(err);
+        this.setState({ err: err.messages });
+      });
+  }
+
   verifyUser() {
     axios({
       method: 'post',
-      url: `${BACKEND_IP}/login`,
+      url: `/login`,
       data: {
         user: this.state.userName,
       },
@@ -30,9 +50,9 @@ class App extends Component {
       .then(({ data }) => {
         if (data.newUser) {
           this.setState({ newUser: true });
-        } else if (data.pre_ts && data.missedMessagesCount !== undefined) {
+        } else if (data.logout_ts && data.missedMessagesCount !== undefined) {
           this.setState({
-            pre_ts: data.pre_ts,
+            logout_ts: data.logout_ts,
             missedMessagesCount: data.missedMessagesCount,
             existedUser: true,
           });
@@ -44,13 +64,25 @@ class App extends Component {
   }
 
   handleLogOut() {
-    this.setState({
-      userName: '',
-      existedUser: null,
-      newUser: null,
-      err: null,
-      pre_ts: null,
-    });
+    axios({
+      method: 'post',
+      url: `/logout`,
+      data: {
+        user: this.state.userName,
+      },
+    })
+      .then(() => {
+        this.setState({
+          userName: '',
+          existedUser: null,
+          newUser: null,
+          err: null,
+          logout_ts: null,
+        });
+      })
+      .catch((err) => {
+        this.setState({ err: err.messages });
+      });
   }
 
   handleInputChange(e) {
@@ -72,7 +104,7 @@ class App extends Component {
       err,
       userName,
       missedMessagesCount,
-      pre_ts,
+      logout_ts,
     } = this.state;
     return (
       <div id="app">
@@ -86,7 +118,7 @@ class App extends Component {
           user={userName}
           missedMessagesCount={missedMessagesCount}
           handleLogOut={this.handleLogOut}
-          pre_ts={pre_ts}
+          logout_ts={logout_ts}
         /> :
         <div id="login">
           <input className="input" type="text" id="user" value={userName} onKeyPress={this.pressEnterToLogin} onChange={this.handleInputChange} placeholder="Username" />

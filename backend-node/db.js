@@ -1,9 +1,10 @@
 const mysql = require('mysql');
+const { DB, DB_HOST, DB_USER, DB_PASSWORD } = require('./constants');
 const db = mysql.createPool({
-  host: process.env.db || 'db',
-  user: 'root',
-  password: process.env.dbpassword === '' ? '' : 'testpass',
-  database: 'challenge',
+  host: DB_HOST,
+  user: DB_USER,
+  password: DB_PASSWORD,
+  database: DB,
   multipleStatements: true,
 });
 
@@ -14,17 +15,16 @@ module.exports = {
         callback(err);
         return;
       }
-      connection.query('update users set ts=UNIX_TIMESTAMP( NOW() ) where user=?; SELECT pre_ts FROM users where user = ?', [user, user], (err, result) => {
+      connection.query('update users set login_ts=UNIX_TIMESTAMP( NOW() ) where user=?; SELECT logout_ts FROM users where user = ?', [user, user], (err, results) => {
         if (err) {
           callback(err);
         } else {
-          console.log('indb', result);
-          if(!result[1].length) {
+          if(!results[1].length) {
             callback(null, null);
           } else {
-            const { pre_ts } = result[1][0];
-            callback(null, pre_ts);
-          }   
+            const { logout_ts } = results[1][0];
+            callback(null, logout_ts);
+          }
         }
         connection.release();
       });
@@ -36,7 +36,7 @@ module.exports = {
         callback(err);
         return;
       }
-      connection.query('insert into users (user, ts) values (?, UNIX_TIMESTAMP( NOW() ))', [user], (err) => {
+      connection.query('insert into users (user, login_ts) values (?, UNIX_TIMESTAMP( NOW() ))', [user], (err) => {
         if (err) {
           callback(err);
         } else {
@@ -46,13 +46,13 @@ module.exports = {
       });
     });
   },
-  checkMissedMessagesCountInDB: (pre_ts, callback) => {
+  checkMissedMessagesCountInDB: (logout_ts, callback) => {
     db.getConnection((err, connection) => {
       if (err) {
         callback(err);
         return;
       }
-      connection.query('select count(*) as missedMessagesCount from messages where ts > ?', [pre_ts], (err, result) => {
+      connection.query('select count(*) as missedMessagesCount from messages where ts > ?', [logout_ts], (err, result) => {
         if (err) {
           callback(err);
         } else {
@@ -76,9 +76,9 @@ module.exports = {
       });
     });
   },
-  saveLogOutToDb: (user, pre_ts, callback) => {
+  saveLogOutToDb: (user, logout_ts, callback) => {
     db.getConnection((err, connection) => {
-      connection.query('update users set pre_ts = ? where user = ?', [pre_ts, user], (err) => {
+      connection.query('update users set logout_ts = ? where user = ?', [logout_ts, user], (err) => {
         if(err) {
           callback(err);
         } else {
@@ -91,7 +91,7 @@ module.exports = {
 
   fetchUsersFromDbToCache: (callback) => {
     db.getConnection((err, connection) => {
-      connection.query('select user from users where ts > pre_ts limit 200', (err, users) => {
+      connection.query('select user from users where login_ts > logout_ts limit 200', (err, users) => {
         if(err) {
           callback(err);
         } else {
@@ -119,7 +119,6 @@ module.exports = {
         if(err) {
           callback(err);
         } else {
-          console.log('mesgs', messages, ts);
           callback(null, messages);
         }
         connection.release();
