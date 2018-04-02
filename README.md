@@ -1,11 +1,11 @@
-#Chatter Box
+# Chatter Box
 
 ## set up
-### use docker
+### Use docker
 - docker-compose up fullstack
 - go to: http:// localhost:13000
 
-### fork the repo and clone to local repository
+### Fork the repo and clone to local repository
 - make sure you have MySQL and Redis installed
 - configure the connection params in backend-node/constants.js
 - run npm install
@@ -14,7 +14,7 @@
 - run npm start and it will open a window on browser 'http://localhost:3000'
 
 ## Test
-- run jest
+- Run 'jest' in terminal
 
 ## Overview & Assumptions
 Build real- time chat app
