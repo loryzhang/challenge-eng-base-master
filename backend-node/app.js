@@ -1,34 +1,36 @@
-const session = require("express-session");
+const session = require('express-session');
 const bodyParser = require('body-parser');
 const socketIO = require('socket.io');
 const flash = require('connect-flash');
 const express = require('express');
-const cors = require('cors');
-const path = require('path');
 const RedisStore = require('connect-redis')(session);
 
-const { CORS_ORIGIN, EXPRESS_PORT, REDIS_HOST, REDIS_PORT, HEARTBEAT_TIMEOUT, HEARTBEAT_INTERVAL } = require('./constants');
-const client = require('redis').createClient({ host: REDIS_HOST, port:REDIS_PORT });
+const { EXPRESS_PORT, REDIS_HOST, REDIS_PORT, HEARTBEAT_TIMEOUT, HEARTBEAT_INTERVAL } = require('./constants');
+const client = require('redis').createClient({ host: REDIS_HOST, port: REDIS_PORT });
 const SocketManager = require('./SocketManager');
 const passport = require('./passport');
 const router = require('./router');
 
-const corsOptions = {
-  origin: CORS_ORIGIN,
-  credentials: true,
-  optionsSuccessStatus: 200 // some legacy browsers (IE11, various SmartTVs) choke on 204   
-}
-
 const app = express();
 const server = require('http').createServer(app);
-const io = socketIO(server);
 
-app.use(cors(corsOptions));
+// uncomment for local development
+// const cors = require('cors');
+// const { CORS_ORIGIN } = require('./constants');
+// const corsOptions = {
+//   origin: CORS_ORIGIN,
+//   credentials: true,
+//   optionsSuccessStatus: 200, // some legacy browsers (IE11, various SmartTVs) choke on 204
+// };
+// app.use(cors(corsOptions));
+
+const io = socketIO(server);
 app.use(session({
-  store: new RedisStore({client: client}),
+  store: new RedisStore({ client }),
   secret: 'chatterbox',
   saveUninitialized: false,
   resave: false,
+  cookie: { maxAge: 60000 }, // session expired in 10 mins
 }));
 app.use(flash());
 app.use(passport.initialize());
@@ -42,6 +44,6 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 app.use(router);
 
-server.listen(EXPRESS_PORT, function() {
-    console.log(`Listening on port ${EXPRESS_PORT}`);
+server.listen(EXPRESS_PORT, () => {
+  console.log(`Listening on port ${EXPRESS_PORT}`);
 });

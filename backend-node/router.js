@@ -3,8 +3,10 @@ const db = require('./db');
 const redis = require('./redis');
 const passport = require('./passport');
 
-router.post('/login', passport.authenticate('loginUser', { failureRedirect: '/login', successRedirect:'/messages',
-failureFlash : true }));
+router.post('/login', passport.authenticate('loginUser', {
+  failureRedirect: '/login',
+  successRedirect: '/messages',
+  failureFlash: true }));
 
 router.get('/login', (req, res) => {
   const err = { message: req.flash('error')[0] };
@@ -16,21 +18,19 @@ router.get('/checkSession', (req, res) => {
     res.redirect('/messages');
   } else {
     res.redirect('/login');
-  }  
+  }
 });
 
 router.get('/messages', (req, res) => {
   const { user } = req.session.passport;
-  console.log(user);
-  db.getUserPreLogoutTS(user, (err, logout_ts) => {
-    if (err) {
-      res.status(500).send(err.message);
+  db.getUserPreLogoutTS(user, (error, logout_ts) => {
+    if (error) {
+      res.status(500).send(error.message);
     } else {
       redis.checkMissedMessagesCountInCache(logout_ts, (err, missedMessagesCount) => {
         if (err) {
           res.status(500).send(err.message);
         } else {
-          console.log('successful login', user);
           res.json({ missedMessagesCount, logout_ts, user });
         }
       });
@@ -48,12 +48,10 @@ router.post('/loadMore', (req, res) => {
   db.loadMoreMessage(ts, (err, messages) => {
     if (err) {
       res.status(500).send(err.message);
+    } else if (messages.length === 0) {
+      res.json({ moreMessages: [], hasMoreMessages: false });
     } else {
-      if (messages.length === 0) {
-        res.json({ moreMessages: [], hasMoreMessages: false});
-      } else {
-        res.json({ moreMessages: Array.from(messages), hasMoreMessages: true })
-      }
+      res.json({ moreMessages: Array.from(messages), hasMoreMessages: true });
     }
   });
 });

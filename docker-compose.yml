@@ -1,12 +1,12 @@
 version: '3'
 
 services:
-    nginix:
-        build: nginx
-        links:
-            - fullstack
-        ports:
-            - "8080:80"
+    # nginix:
+    #     build: nginx
+    #     links:
+    #         - fullstack
+    #     ports:
+    #         - "8080:80"
     db:
         image: mysql:5.7
         environment:
@@ -14,7 +14,7 @@ services:
             - MYSQL_DATABASE=challenge
         volumes:
             - devmysqldb:/var/lib/mysql
-            - ./db/sql:/docker-entrypoint-initdb.d
+            - ./db/sql/:/docker-entrypoint-initdb.d
 
     backend:
         build: backend-node

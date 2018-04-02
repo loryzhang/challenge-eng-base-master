@@ -1,4 +1,4 @@
 module.exports = {
-  BACKEND_IP: 'http://localhost:8000',
+  BACKEND_IP: process.env.BACKEND_IP || '',
   // BACKEND_IP: '',
 };

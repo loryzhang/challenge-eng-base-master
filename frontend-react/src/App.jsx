@@ -32,7 +32,7 @@ class App extends Component {
         } else {
           this.connectSocket();
           const { user, missedMessagesCount, logout_ts } = data;
-          this.setState({ user, missedMessagesCount, logout_ts});
+          this.setState({ user, missedMessagesCount, logout_ts });
         }
       })
       .catch((err) => {
@@ -57,7 +57,7 @@ class App extends Component {
         } else {
           const { user, missedMessagesCount, logout_ts } = data;
           this.connectSocket();
-          this.setState({ user, missedMessagesCount, logout_ts});
+          this.setState({ user, missedMessagesCount, logout_ts });
         }
       })
       .catch((err) => {

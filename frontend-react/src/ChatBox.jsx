@@ -23,7 +23,7 @@ class ChatBox extends Component {
     };
     this.addSocketEventListener();
     this.loadMore = this.loadMore.bind(this);
-    // In case of server restart, send user to label socket connection
+    // If server restart, socket will reconnect knowing who the user is
     setInterval(() => {
       this.state.socket.emit('pingUser', this.state.user);
     }, 1000);
@@ -148,7 +148,8 @@ ChatBox.propTypes = {
   socket: PropTypes.object.isRequired,
   user: PropTypes.string.isRequired,
   missedMessagesCount: PropTypes.string.isRequired,
-  logout_ts: PropTypes.number.isRequired,
+  logout_ts: PropTypes.string.isRequired,
+  handleLogOut: PropTypes.func.isRequired,
 };
 
 export default ChatBox;
