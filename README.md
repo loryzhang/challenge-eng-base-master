@@ -19,8 +19,8 @@ As a user, I want to see all the messages in the chat room in real-time.
 As a user, I want to see how many users and who are they in the same chat room with me.
 
 # System Architecture
-![alt tag](https://imgur.com/a/AsYDR)
-![Alt text](https://imgur.com/a/AsYDR)
+![alt tag](https://i.imgur.com/PeygIvQ.png)
+![Alt text](https://i.imgur.com/PeygIvQ.png)
 
 # Features
 Authentication and session
