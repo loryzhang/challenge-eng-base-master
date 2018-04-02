@@ -2,8 +2,10 @@ import SocketClient from 'socket.io-client';
 import React, { Component } from 'react';
 import axios from 'axios';
 import ChatBox from './ChatBox';
-import { BACKEND_IP } from './constants';
 
+// switch BACKEND_IP for local development envirment
+const BACKEND_IP = '';
+// const BACKEND_IP = 'http://localhost:8000';
 axios.defaults.withCredentials = true;
 
 class App extends Component {
@@ -22,9 +24,12 @@ class App extends Component {
   }
 
   componentDidMount() {
-    axios(`${BACKEND_IP}/checkSession`)
+    axios({
+      method: 'get',
+      url: `${BACKEND_IP}/checkSession`,
+    })
       .then(({ data }) => {
-        if (!data) {
+        if (!Object.keys(data).length) {
           return;
         }
         if (data.message) {
@@ -50,7 +55,11 @@ class App extends Component {
 
   handleLogIn() {
     const { username, email } = this.state;
-    axios.post(`${BACKEND_IP}/login`, { username, email })
+    axios({
+      method: 'post',
+      url: `${BACKEND_IP}/login`,
+      data: { username, email },
+    })
       .then(({ data }) => {
         if (data.message) {
           this.setState({ err: data.message });
@@ -69,7 +78,11 @@ class App extends Component {
     const { user, socket } = this.state;
     socket.emit('disconnect', user);
     socket.disconnect();
-    axios.post(`${BACKEND_IP}/logout`, user)
+    axios({
+      method: 'post',
+      url: `${BACKEND_IP}/logout`,
+      data: user,
+    })
       .then(() => {
         this.setState({
           username: '',

@@ -3,22 +3,23 @@ const db = require('./db');
 const redis = require('./redis');
 const passport = require('./passport');
 
-router.post('/login', passport.authenticate('loginUser', {
-  failureRedirect: '/login',
-  successRedirect: '/messages',
-  failureFlash: true }));
-
-router.get('/login', (req, res) => {
-  const err = { message: req.flash('error')[0] };
-  res.json(err);
-});
-
 router.get('/checkSession', (req, res) => {
   if (req.isAuthenticated()) {
     res.redirect('/messages');
   } else {
     res.redirect('/login');
   }
+});
+
+router.post('/login', passport.authenticate('loginUser', {
+  failureRedirect: '/login',
+  successRedirect: '/messages',
+  failureFlash: true,
+}));
+
+router.get('/login', (req, res) => {
+  const err = { message: req.flash('error')[0] };
+  res.json(err);
 });
 
 router.get('/messages', (req, res) => {
@@ -55,4 +56,5 @@ router.post('/loadMore', (req, res) => {
     }
   });
 });
+
 module.exports = router;

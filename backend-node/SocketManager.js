@@ -82,7 +82,6 @@ module.exports = (socket) => {
   });
 
   socket.on('disconnect', () => {
-    console.log('when disconnect', socket.user);
     redis.srem('users', socket.user, (err) => {
       if (err) {
         console.error(err);

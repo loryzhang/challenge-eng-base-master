@@ -5,8 +5,7 @@ const db = require('./db');
 passport.use('loginUser', new Strategy({
   usernameField: 'username',
   passwordField: 'email',
-  passReqToCallback: true,
-}, (req, username, password, cb) => {
+}, (username, password, cb) => {
   db.findUserByUsername(username, (err, user, email) => {
     if (err) {
       return cb(err);

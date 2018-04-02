@@ -3,9 +3,10 @@ const bodyParser = require('body-parser');
 const socketIO = require('socket.io');
 const flash = require('connect-flash');
 const express = require('express');
+const cors = require('cors');
 const RedisStore = require('connect-redis')(session);
 
-const { EXPRESS_PORT, REDIS_HOST, REDIS_PORT, HEARTBEAT_TIMEOUT, HEARTBEAT_INTERVAL } = require('./constants');
+const { CORS_ORIGIN, EXPRESS_PORT, REDIS_HOST, REDIS_PORT, HEARTBEAT_TIMEOUT, HEARTBEAT_INTERVAL } = require('./constants');
 const client = require('redis').createClient({ host: REDIS_HOST, port: REDIS_PORT });
 const SocketManager = require('./SocketManager');
 const passport = require('./passport');
@@ -14,15 +15,12 @@ const router = require('./router');
 const app = express();
 const server = require('http').createServer(app);
 
-// uncomment for local development
-// const cors = require('cors');
-// const { CORS_ORIGIN } = require('./constants');
-// const corsOptions = {
-//   origin: CORS_ORIGIN,
-//   credentials: true,
-//   optionsSuccessStatus: 200, // some legacy browsers (IE11, various SmartTVs) choke on 204
-// };
-// app.use(cors(corsOptions));
+const corsOptions = {
+  origin: CORS_ORIGIN,
+  credentials: true,
+  optionsSuccessStatus: 200, // some legacy browsers (IE11, various SmartTVs) choke on 204
+};
+app.use(cors(corsOptions));
 
 const io = socketIO(server);
 app.use(session({

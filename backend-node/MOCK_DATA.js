@@ -1,4 +1,6 @@
 /* eslint-disable */
+// if fake data is needed
+// this script will generate 1000 messages, 750 users in db
 const fs = require('fs');
 const path = require('path');
 const mysql = require('mysql');

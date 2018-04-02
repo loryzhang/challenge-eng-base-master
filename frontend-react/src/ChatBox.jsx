@@ -3,11 +3,13 @@ import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import moment from 'moment';
 import axios from 'axios';
-import { BACKEND_IP } from './constants';
 import MessageInput from './MessageInput';
 import MessageList from './MessageList';
 import UserList from './UserList';
 
+// switch BACKEND_IP for local development envirment
+const BACKEND_IP = '';
+// const BACKEND_IP = 'http://localhost:8000';
 class ChatBox extends Component {
   constructor(props) {
     super(props);
@@ -147,8 +149,8 @@ class ChatBox extends Component {
 ChatBox.propTypes = {
   socket: PropTypes.object.isRequired,
   user: PropTypes.string.isRequired,
-  missedMessagesCount: PropTypes.string.isRequired,
-  logout_ts: PropTypes.string.isRequired,
+  missedMessagesCount: PropTypes.number.isRequired,
+  logout_ts: PropTypes.number.isRequired,
   handleLogOut: PropTypes.func.isRequired,
 };
 

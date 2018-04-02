@@ -21,10 +21,11 @@ module.exports = {
           callback(err);
         } else if (!results.length) {
           callback(null, null, null);
+          connection.release();
         } else {
           callback(null, results[0].user, results[0].email);
+          connection.release();
         }
-        connection.release();
       });
     });
   },
@@ -37,13 +38,15 @@ module.exports = {
       connection.query('update users set login_ts=UNIX_TIMESTAMP( NOW() ) where user=?; SELECT logout_ts FROM users where user = ?', [user, user], (err, results) => {
         if (err) {
           callback(err);
+          connection.release();
         } else if (!results[1].length) {
           callback(null, null);
+          connection.release();
         } else {
           const { logout_ts } = results[1][0];
           callback(null, logout_ts);
+          connection.release();
         }
-        connection.release();
       });
     });
   },
@@ -56,10 +59,11 @@ module.exports = {
       connection.query('insert into users (user, login_ts, email) values (?, UNIX_TIMESTAMP( NOW() ), ?)', [user, email], (err) => {
         if (err) {
           callback(err);
+          connection.release();
         } else {
           callback(null);
+          connection.release();
         }
-        connection.release();
       });
     });
   },
@@ -72,11 +76,12 @@ module.exports = {
       connection.query('select count(*) as missedMessagesCount from messages where ts > ?', [logout_ts], (err, result) => {
         if (err) {
           callback(err);
+          connection.release();
         } else {
           const { missedMessagesCount } = result[0];
           callback(null, missedMessagesCount);
+          connection.release();
         }
-        connection.release();
       });
     });
   },
@@ -90,10 +95,11 @@ module.exports = {
       connection.query('insert into messages (user, text, ts) values (?, ?, ?)', [user, text, ts], (err) => {
         if (err) {
           callback(err);
+          connection.release();
         } else {
           callback(null);
+          connection.release();
         }
-        connection.release();
       });
     });
   },
@@ -106,10 +112,11 @@ module.exports = {
       connection.query('update users set logout_ts = ? where user = ?', [logout_ts, user], (err) => {
         if (err) {
           callback(err);
+          connection.release();
         } else {
           callback(null);
+          connection.release();
         }
-        connection.release();
       });
     });
   },
@@ -123,10 +130,11 @@ module.exports = {
       connection.query('select user from users where login_ts > logout_ts limit 200', (err, users) => {
         if (err) {
           callback(err);
+          connection.release();
         } else {
           callback(null, users);
+          connection.release();
         }
-        connection.release();
       });
     });
   },
@@ -139,10 +147,11 @@ module.exports = {
       connection.query('select * from messages order by ts desc limit 200', (err, messages) => {
         if (err) {
           callback(err);
+          connection.release();
         } else {
           callback(null, messages.reverse());
+          connection.release();
         }
-        connection.release();
       });
     });
   },
@@ -155,10 +164,11 @@ module.exports = {
       connection.query('select user, text, ts from messages where ts < ? order by ts desc limit 100', [ts], (err, messages) => {
         if (err) {
           callback(err);
+          connection.release();
         } else {
           callback(null, messages);
+          connection.release();
         }
-        connection.release();
       });
     });
   },
