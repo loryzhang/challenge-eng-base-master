@@ -8,12 +8,14 @@
 ### Fork the repo and clone to local repository
 - make sure you have MySQL and Redis installed
 - configure the connection params in backend-node/constants.js
-- run npm install
-- go to backend-node/ and run node app.js
+- npm install 
+- go to backend-node/ and run npm install
+- run node app.js
 - in frontend-react/src/App.jsx & frontend-react/src/ChatBox.jsx, switch BACKEND_IP to 'http://localhost:8000'
 - run npm start and it will open a window on browser 'http://localhost:3000'
 
 ## Test
+- npm install --save jest
 - Run 'jest' in terminal
 
 ## Overview & Assumptions
