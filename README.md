@@ -1,11 +1,12 @@
 # Chatter Box
 
 ## set up
+Fork the repo and clone to local repository
 ### Use docker
 - docker-compose up fullstack
 - go to: http:// localhost:13000
 
-### Fork the repo and clone to local repository
+### Not use docker
 - make sure you have MySQL and Redis installed
 - configure the connection params in backend-node/constants.js
 - npm install 
