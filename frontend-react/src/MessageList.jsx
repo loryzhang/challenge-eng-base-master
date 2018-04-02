@@ -12,7 +12,7 @@ const MessageList = (props) => {
         hasMore={hasMoreMessages}
         loader={<div className="loader">Loading ...</div>}
       >
-        { messages.map(message => <div><Message message={message} /></div>) }
+        { messages.map(message => <Message message={message} key={message.id} />) }
       </InfiniteScroll>
     </div>
   );

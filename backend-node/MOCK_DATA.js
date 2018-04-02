@@ -1,16 +1,15 @@
 const fs = require('fs');
 const path = require('path');
 const mysql = require('mysql');
-const db = mysql.createConnection({
-  host: process.env.db || 'db',
-  user: 'root',
-  password: process.env.dbpassword === '' ? '' : 'testpass',
-  database: 'challenge',
-  debug: true,
+const { DB, DB_HOST, DB_USER, DB_PASSWORD } = require('./constants');
+const db = mysql.createPool({
+  host: DB_HOST,
+  user: DB_USER,
+  password: DB_PASSWORD,
+  database: DB,
   multipleStatements: true,
 });
 
-db.connect();
 fs.readFile(path.join(__dirname, '/MOCK_DATA.csv'), 'utf8', (err, data) => {
   const mockData = data.split('\n').map((row) => {
     const cols = row.split(',');
@@ -30,10 +29,11 @@ fs.readFile(path.join(__dirname, '/MOCK_DATA.csv'), 'utf8', (err, data) => {
     
     while (uniqRows.length) {
       const user = uniqRows.pop();
+      const email = `${user}@fake.com`
       const row_ts = Math.floor(Date.now()/1000) - Math.floor(Math.random() * 1000);
       const login_ts = row_ts - Math.floor(Math.random() * 1000);
       const logout_ts = login_ts - Math.floor(Math.random() * 10000)
-      const eachAddUser = await query('insert into users (user, login_ts, logout_ts) values (?, ?, ?)', [user, login_ts, logout_ts]);
+      const eachAddUser = await query('insert into users (user, email, login_ts, logout_ts) values (?, ?, ?, ?)', [user, email, login_ts, logout_ts]);
       console.log(user, 'done!');
     } 
   }

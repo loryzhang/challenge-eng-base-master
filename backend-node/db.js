@@ -9,6 +9,26 @@ const db = mysql.createPool({
 });
 
 module.exports = {
+  findUserByUsername: (user, callback) => {
+    db.getConnection((err, connection) => {
+      if (err) {
+        callback(err);
+        return;
+      }
+      connection.query('select user, email from users where user=?', [user], (err, results) => {
+        if(err) {
+          callback(err);
+        } else {
+          if(!results.length) {
+            callback(null, null, null);
+          } else {
+            callback(null, results[0].user, results[0].email);
+          }
+        }
+        connection.release();
+      });
+    })
+  },
   getUserPreLogoutTS: (user, callback) => {
     db.getConnection((err, connection) => {
       if (err) {
@@ -30,13 +50,13 @@ module.exports = {
       });
     });
   },
-  addUser: (user, callback) => {
+  addUser: (user, email, callback) => {
     db.getConnection((err, connection) => {
       if (err) {
         callback(err);
         return;
       }
-      connection.query('insert into users (user, login_ts) values (?, UNIX_TIMESTAMP( NOW() ))', [user], (err) => {
+      connection.query('insert into users (user, login_ts, email) values (?, UNIX_TIMESTAMP( NOW() ), ?)', [user, email], (err) => {
         if (err) {
           callback(err);
         } else {
@@ -103,7 +123,7 @@ module.exports = {
   },
   fetchMessagesFromDbToCache: (callback)=> {
     db.getConnection((err, connection) => {
-      connection.query('select user, text, ts from messages order by ts desc limit 200', (err, messages) => {
+      connection.query('select * from messages order by ts desc limit 200', (err, messages) => {
         if(err) {
           callback(err);
         } else {

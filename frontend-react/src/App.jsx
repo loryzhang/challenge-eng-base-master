@@ -1,61 +1,63 @@
-import axios from 'axios';
+import SocketClient from 'socket.io-client';
 import React, { Component } from 'react';
+import axios from 'axios';
 import ChatBox from './ChatBox';
 import { BACKEND_IP } from './constants';
+
+axios.defaults.withCredentials = true;
 
 class App extends Component {
   constructor() {
     super();
     this.state = {
-      userName: '',
-      existedUser: null,
-      newUser: null,
-      missedMessagesCount: '',
+      username: '',
+      email: '',
+      user: null,
       err: null,
     };
-
     this.handleInputChange = this.handleInputChange.bind(this);
-    this.pressEnterToLogin = this.pressEnterToLogin.bind(this);
-    this.verifyUser = this.verifyUser.bind(this);
+    this.connectSocket = this.connectSocket.bind(this);
+    this.handleLogIn = this.handleLogIn.bind(this);
     this.handleLogOut = this.handleLogOut.bind(this);
   }
 
   componentDidMount() {
-    axios('/checkSession')
-      .then((result) => {
-        console.log('hi', result);
-        this.setState({ userName: result.data.user })
-        // const { user, logout_ts, missedMessagesCount } = data;
-        // this.setState({
-        //   userName: user,
-        //   logout_ts,
-        //   missedMessagesCount,
-        //   existedUser: true,
-        // });
+    axios(`${BACKEND_IP}/checkSession`)
+      .then(({ data }) => {
+        if (!data) {
+          return;
+        }
+        if (data.message) {
+          this.setState({ err: data.message });
+        } else {
+          this.connectSocket();
+          const { user, missedMessagesCount, logout_ts } = data;
+          this.setState({ user, missedMessagesCount, logout_ts});
+        }
       })
       .catch((err) => {
-        console.log(err);
         this.setState({ err: err.messages });
       });
   }
 
-  verifyUser() {
-    axios({
-      method: 'post',
-      url: `/login`,
-      data: {
-        user: this.state.userName,
-      },
-    })
+  connectSocket() {
+    const socket = SocketClient(BACKEND_IP);
+    socket.on('connect', () => {
+      console.log('connect to socket');
+    });
+    this.setState({ socket });
+  }
+
+  handleLogIn() {
+    const { username, email } = this.state;
+    axios.post(`${BACKEND_IP}/login`, { username, email })
       .then(({ data }) => {
-        if (data.newUser) {
-          this.setState({ newUser: true });
-        } else if (data.logout_ts && data.missedMessagesCount !== undefined) {
-          this.setState({
-            logout_ts: data.logout_ts,
-            missedMessagesCount: data.missedMessagesCount,
-            existedUser: true,
-          });
+        if (data.message) {
+          this.setState({ err: data.message });
+        } else {
+          const { user, missedMessagesCount, logout_ts } = data;
+          this.connectSocket();
+          this.setState({ user, missedMessagesCount, logout_ts});
         }
       })
       .catch((err) => {
@@ -64,19 +66,17 @@ class App extends Component {
   }
 
   handleLogOut() {
-    axios({
-      method: 'post',
-      url: `/logout`,
-      data: {
-        user: this.state.userName,
-      },
-    })
+    const { user, socket } = this.state;
+    socket.emit('disconnect', user);
+    socket.disconnect();
+    axios.post(`${BACKEND_IP}/logout`, user)
       .then(() => {
         this.setState({
-          userName: '',
-          existedUser: null,
-          newUser: null,
+          username: '',
+          email: '',
+          user: null,
           err: null,
+          missedMessagesCount: null,
           logout_ts: null,
         });
       })
@@ -86,43 +86,42 @@ class App extends Component {
   }
 
   handleInputChange(e) {
-    this.setState({
-      userName: e.target.value,
-    });
-  }
-
-  pressEnterToLogin(e) {
-    if (e.key === 'Enter') {
-      this.verifyUser();
+    if (e.target.name === 'email') {
+      this.setState({ email: e.target.value });
+    } else {
+      this.setState({
+        username: e.target.value,
+      });
     }
   }
 
   render() {
     const {
-      newUser,
-      existedUser,
       err,
-      userName,
+      user,
       missedMessagesCount,
       logout_ts,
+      socket,
     } = this.state;
     return (
       <div id="app">
         <div id="header">
           <h3>Chatter Box</h3>
-          { err && <p className="err">{err}</p> }
-          { newUser && <p>Welcome {userName}!</p> }
-          { existedUser && <p>Welcome back, {userName}!</p> }
+          { user &&
+          <p>Welcome {user}!<span><button onClick={this.handleLogOut}>Log Out</button></span></p> }
         </div>
-        { newUser || existedUser ? <ChatBox
-          user={userName}
+        { user ? <ChatBox
+          user={user}
           missedMessagesCount={missedMessagesCount}
-          handleLogOut={this.handleLogOut}
           logout_ts={logout_ts}
+          socket={socket}
+          handleLogOut={this.handleLogOut}
         /> :
         <div id="login">
-          <input className="input" type="text" id="user" value={userName} onKeyPress={this.pressEnterToLogin} onChange={this.handleInputChange} placeholder="Username" />
-          <button onClick={this.verifyUser}>Log In</button>
+          <input name="username" type="text" id="user" placeholder="username" onChange={this.handleInputChange} />
+          <input name="email" type="email" id="email" placeholder="email" onChange={this.handleInputChange} />
+          <button onClick={this.handleLogIn}>Log In</button>
+          { err && <p className="err">{err}</p> }
         </div>
         }
       </div>

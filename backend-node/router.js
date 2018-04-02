@@ -1,39 +1,37 @@
 const router = require('express').Router();
 const db = require('./db');
 const redis = require('./redis');
+const passport = require('./passport');
 
-const sessionToUser = new Map();
-router.get('/checkSession', (req, res) => {
-  if (req.session) {
-    res.json({ user: req.session.user });
-  } else {
-    res.json({ user: ''});
-  }
+router.post('/login', passport.authenticate('loginUser', { failureRedirect: '/login', successRedirect:'/messages',
+failureFlash : true }));
+
+router.get('/login', (req, res) => {
+  const err = { message: req.flash('error')[0] };
+  res.json(err);
 });
 
-router.post('/login', (req, res) => {
-  const { user } = req.body;
-  req.session.user = user;
-  console.log(req.session);
-  req.session.save();
+router.get('/checkSession', (req, res) => {
+  if (req.isAuthenticated()) {
+    res.redirect('/messages');
+  } else {
+    res.redirect('/login');
+  }  
+});
+
+router.get('/messages', (req, res) => {
+  const { user } = req.session.passport;
+  console.log(user);
   db.getUserPreLogoutTS(user, (err, logout_ts) => {
     if (err) {
       res.status(500).send(err.message);
-    }
-    if (!logout_ts) {
-      db.addUser(user, (err) => {
-        if (err) {
-          res.status(500).send(err.message);
-        } else {
-          res.json({ newUser: true });
-        }
-      });
     } else {
       redis.checkMissedMessagesCountInCache(logout_ts, (err, missedMessagesCount) => {
         if (err) {
           res.status(500).send(err.message);
         } else {
-          res.json({ missedMessagesCount, logout_ts });
+          console.log('successful login', user);
+          res.json({ missedMessagesCount, logout_ts, user });
         }
       });
     }
@@ -41,8 +39,8 @@ router.post('/login', (req, res) => {
 });
 
 router.post('/logout', (req, res) => {
-  console.log('destroy')
-  res.end();
+  req.logout();
+  res.redirect('/login');
 });
 
 router.post('/loadMore', (req, res) => {

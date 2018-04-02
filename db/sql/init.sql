@@ -2,7 +2,8 @@ USE challenge;
 
 CREATE TABLE users(
   id int NOT NULL AUTO_INCREMENT,
-  user varchar(100),
+  user varchar(100) NOT NULL UNIQUE,
+  email varchar(255) NOT NULL UNIQUE,
   login_ts int(11) NOT NULL DEFAULT 0,
   logout_ts int(11) NOT NULL DEFAULT 0, 
   primary key (id));
