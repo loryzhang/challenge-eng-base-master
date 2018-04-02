@@ -1,3 +1,5 @@
+/* eslint-disable */
+
 const SocketClient = require('socket.io-client');
 const mysql = require('mysql');
 const redis = require('redis');
@@ -15,9 +17,8 @@ describe('socket, db and cache', () => {
       port: 6379,
     });
     db = mysql.createConnection({
-      host: process.env.db || 'db',
       user: 'root',
-      password: process.env.dbpassword === '' ? '' : 'testpass',
+      password: '',
       database: 'challenge',
       multipleStatements: true,
     });
@@ -44,23 +45,23 @@ describe('socket, db and cache', () => {
   });
 
   it('should add user to users table', (done) => {
-     db.query('select count(*) as count from users', (err, count1) => {
-       if (err) {
-         throw err;
-       }
-       dbAPI.addUser(`testUser${Date.now().toString()}`, (err) => {
-         if (err) {
-           throw err;
-         }
-         db.query('select count(*) as count from users', (err, count2) => {
-           if (err) {
-             throw err;
-            }
-            expect(count1[0].count + 1).toBe(count2[0].count);
-            done();
-          });
-       });
-     });
+    db.query('select count(*) as count from users', (err, count1) => {
+      if (err) {
+        throw err;
+      }
+      dbAPI.addUser(`testUser${Date.now().toString()}`, `testUser${Date.now().toString()}@fake.com`, (err) => {
+        if (err) {
+          throw err;
+        }
+        db.query('select count(*) as count from users', (err, count2) => {
+          if (err) {
+            throw err;
+          }
+          expect(count1[0].count + 1).toBe(count2[0].count);
+          done();
+        });
+      });
+    });
   });
   
   it('should insert new message into the cache and db when sendMessage is emitted', (done) => {
