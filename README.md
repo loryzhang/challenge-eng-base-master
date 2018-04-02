@@ -19,7 +19,7 @@
 - Run 'jest' in terminal
 
 ## Overview & Assumptions
-Build real- time chat app
+Build real- time chat app (MVP)
 - A single-room chatterbox
 - Need to have persistent database
 - Scalable and flexible system
