@@ -54,7 +54,7 @@ client.checkMissedMessagesCountInCache = (logout_ts, callback) => {
       if (error) {
         return callback(error);
       }
-      return callback(null, missedMessagesCount);
+      return callback(null, missedMessagesCount.toString());
     });
   });
 };

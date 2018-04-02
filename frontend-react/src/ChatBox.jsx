@@ -149,7 +149,7 @@ class ChatBox extends Component {
 ChatBox.propTypes = {
   socket: PropTypes.object.isRequired,
   user: PropTypes.string.isRequired,
-  missedMessagesCount: PropTypes.number.isRequired,
+  missedMessagesCount: PropTypes.string.isRequired,
   logout_ts: PropTypes.number.isRequired,
   handleLogOut: PropTypes.func.isRequired,
 };
