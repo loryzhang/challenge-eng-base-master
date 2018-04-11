@@ -1,11 +1,15 @@
 # Chatter Box
 
 ## set up
+Fork the repo and clone to local repository
+
 ### Use docker
-- docker-compose up fullstack
+compose db first and make sure db is ready before compose fullstack
+- "docker-compose up db"
+- Please wait 30s after db is up, then run "docker-compose up fullstack"
 - go to: http:// localhost:13000
 
-### Fork the repo and clone to local repository
+### Not use docker
 - make sure you have MySQL and Redis installed
 - configure the connection params in backend-node/constants.js
 - npm install 
