@@ -20,9 +20,11 @@ const corsOptions = {
   credentials: true,
   optionsSuccessStatus: 200, // some legacy browsers (IE11, various SmartTVs) choke on 204
 };
+
 app.use(cors(corsOptions));
 
-const io = socketIO(server);
+const io = socketIO(server, { origins: '*:*', transports: ['websocket'] });
+
 app.use(session({
   store: new RedisStore({ client }),
   secret: 'chatterbox',

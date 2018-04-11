@@ -4,8 +4,8 @@ import axios from 'axios';
 import ChatBox from './ChatBox';
 
 // switch BACKEND_IP for local development envirment
-const BACKEND_IP = '';
-// const BACKEND_IP = 'http://localhost:8000';
+// const BACKEND_IP = 'http://backend:8000';
+const BACKEND_IP = 'http://localhost:18000';
 axios.defaults.withCredentials = true;
 
 class App extends Component {
@@ -21,6 +21,7 @@ class App extends Component {
     this.connectSocket = this.connectSocket.bind(this);
     this.handleLogIn = this.handleLogIn.bind(this);
     this.handleLogOut = this.handleLogOut.bind(this);
+    this.connectSocket = this.connectSocket.bind(this);
   }
 
   componentDidMount() {
@@ -46,11 +47,11 @@ class App extends Component {
   }
 
   connectSocket() {
-    const socket = SocketClient(BACKEND_IP);
-    socket.on('connect', () => {
+    const connectionOptions = { transports: ['websocket'] };
+    this.socket = SocketClient(BACKEND_IP, connectionOptions);
+    this.socket.on('connect', () => {
       console.log('connect to socket');
     });
-    this.setState({ socket });
   }
 
   handleLogIn() {
@@ -75,9 +76,9 @@ class App extends Component {
   }
 
   handleLogOut() {
-    const { user, socket } = this.state;
-    socket.emit('disconnect', user);
-    socket.disconnect();
+    const { user } = this.state;
+    this.socket.emit('disconnect', user);
+    this.socket.disconnect();
     axios({
       method: 'post',
       url: `${BACKEND_IP}/logout`,
@@ -114,7 +115,6 @@ class App extends Component {
       user,
       missedMessagesCount,
       logout_ts,
-      socket,
     } = this.state;
     return (
       <div id="app">
@@ -127,7 +127,7 @@ class App extends Component {
           user={user}
           missedMessagesCount={missedMessagesCount}
           logout_ts={logout_ts}
-          socket={socket}
+          socket={this.socket}
           handleLogOut={this.handleLogOut}
         /> :
         <div id="login">

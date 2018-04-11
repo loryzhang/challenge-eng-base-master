@@ -1,5 +1,6 @@
 import React from 'react';
 import Linkify from 'react-linkify';
+import PropTypes from 'prop-types';
 import moment from 'moment';
 
 const Message = (props) => {
@@ -10,5 +11,10 @@ const Message = (props) => {
     </div>
   );
 };
+
+Message.propTypes = {
+  message: PropTypes.object.isRequired,
+};
+
 
 export default Message;

@@ -1,5 +1,6 @@
 import React from 'react';
 import InfiniteScroll from 'react-infinite-scroller';
+import PropTypes from 'prop-types';
 import Message from './Messsage';
 
 const MessageList = (props) => {
@@ -16,6 +17,12 @@ const MessageList = (props) => {
       </InfiniteScroll>
     </div>
   );
+};
+
+MessageList.propTypes = {
+  messages: PropTypes.array.isRequired,
+  hasMoreMessages: PropTypes.bool.isRequired,
+  loadMore: PropTypes.func.isRequired,
 };
 
 export default MessageList;

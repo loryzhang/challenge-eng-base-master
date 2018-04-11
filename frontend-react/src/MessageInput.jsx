@@ -1,4 +1,5 @@
 import React, { Component } from 'react';
+import PropTypes from 'prop-types';
 
 class MessageInput extends Component {
   constructor(props) {
@@ -6,8 +7,8 @@ class MessageInput extends Component {
     this.state = {
       text: '',
       user: this.props.user,
-      socket: this.props.socket,
     };
+    this.socket = this.props.socket;
     this.sendMessage = this.sendMessage.bind(this);
     this.handleInputChange = this.handleInputChange.bind(this);
     this.sendOnEnter = this.sendOnEnter.bind(this);
@@ -26,13 +27,13 @@ class MessageInput extends Component {
   }
 
   sendMessage() {
-    const { socket, text, user } = this.state;
+    const { text, user } = this.state;
     if (!text.length) {
       // no event will be triggered if the input is empty
       return;
     }
     const message = { text, user };
-    socket.emit('sendMessage', message);
+    this.socket.emit('sendMessage', message);
     this.setState({ text: '' });
   }
 
@@ -45,5 +46,10 @@ class MessageInput extends Component {
     );
   }
 }
+
+MessageInput.propTypes = {
+  socket: PropTypes.object.isRequired,
+  user: PropTypes.string.isRequired,
+};
 
 export default MessageInput;

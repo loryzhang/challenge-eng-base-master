@@ -8,8 +8,8 @@ import MessageList from './MessageList';
 import UserList from './UserList';
 
 // switch BACKEND_IP for local development envirment
-const BACKEND_IP = '';
-// const BACKEND_IP = 'http://localhost:8000';
+// const BACKEND_IP = 'http://backend:8000';
+const BACKEND_IP = 'http://localhost:18000';
 class ChatBox extends Component {
   constructor(props) {
     super(props);
@@ -17,25 +17,26 @@ class ChatBox extends Component {
     this.state = {
       users: [],
       messages: [],
+      numUsers: 0,
       hasMoreMessages: true,
       missedMessagesCount,
       logout_ts,
       user,
-      socket,
     };
+    this.socket = socket;
     this.addSocketEventListener();
     this.loadMore = this.loadMore.bind(this);
     // If server restart, socket will reconnect knowing who the user is
     setInterval(() => {
-      this.state.socket.emit('pingUser', this.state.user);
+      this.socket.emit('pingUser', this.state.user);
     }, 1000);
   }
 
   componentDidMount() {
-    const { socket, user, missedMessagesCount, logout_ts } = this.state;
-    socket.emit('addUser', user);
-    socket.emit('sendUsers');
-    socket.emit('fetchMessages');
+    const { user, missedMessagesCount, logout_ts } = this.state;
+    this.socket.emit('addUser', user);
+    this.socket.emit('sendUsers');
+    this.socket.emit('fetchMessages');
     if (missedMessagesCount && logout_ts) {
       toast(`You've received ${missedMessagesCount} messages since ${moment(logout_ts * 1000).format('llll').toString()}`, { autoClose: false });
     } else if (missedMessagesCount) {
@@ -48,9 +49,8 @@ class ChatBox extends Component {
   }
 
   addSocketEventListener() {
-    const { socket } = this.state;
     // if an user opened multiple tabs, announce to other users only once
-    socket.on('userJoined', (user, alreadyJoined) => {
+    this.socket.on('userJoined', (user, alreadyJoined) => {
       if (!alreadyJoined) {
         this.setState((prevState) => {
           const { numUsers, users } = prevState;
@@ -62,11 +62,11 @@ class ChatBox extends Component {
         toast(`${user} just joined us!`, { autoClose: 1500 });
       }
     });
-    socket.on('removeUser', (username) => {
+    this.socket.on('removeUser', (username) => {
       // if an user opened multple tabs, force log out all the tabs at once
       if (this.props.user === username) {
-        socket.emit('disconnect', username);
-        socket.disconnect();
+        this.socket.emit('disconnect', username);
+        this.socket.disconnect();
         this.props.handleLogOut();
       }
       this.setState((prevState) => {
@@ -80,13 +80,13 @@ class ChatBox extends Component {
       });
       toast(`${username} just left...`, { autoClose: 1500 });
     });
-    socket.on('getUsers', (users) => {
+    this.socket.on('getUsers', (users) => {
       this.setState({ users, numUsers: users.length });
     });
-    socket.on('receiveMsgs', (messages) => {
+    this.socket.on('receiveMsgs', (messages) => {
       this.setState({ messages });
     });
-    socket.on('updateMessage', (message) => {
+    this.socket.on('updateMessage', (message) => {
       this.setState({
         messages: [message, ...this.state.messages],
       });
@@ -122,7 +122,6 @@ class ChatBox extends Component {
       numUsers,
       userLeaving,
       users,
-      socket,
       messages,
       hasMoreMessages,
     } = this.state;
@@ -130,7 +129,7 @@ class ChatBox extends Component {
     return (
       <div id="chat-box">
         <ToastContainer />
-        <MessageInput user={user} socket={socket} />
+        <MessageInput user={user} socket={this.socket} />
         <UserList
           users={users}
           numUsers={numUsers}
