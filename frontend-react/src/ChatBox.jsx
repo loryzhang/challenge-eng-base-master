@@ -8,8 +8,8 @@ import MessageList from './MessageList';
 import UserList from './UserList';
 
 // switch BACKEND_IP for local development envirment
-// const BACKEND_IP = 'http://backend:8000';
-const BACKEND_IP = 'http://localhost:18000';
+const BACKEND_IP = 'http://localhost:8000';
+// const BACKEND_IP = 'http://localhost:18000';
 class ChatBox extends Component {
   constructor(props) {
     super(props);
@@ -127,20 +127,22 @@ class ChatBox extends Component {
     } = this.state;
 
     return (
-      <div id="chat-box">
-        <ToastContainer />
+      <section id="chat-box">
+        <ToastContainer className="notice" />
         <MessageInput user={user} socket={this.socket} />
-        <UserList
-          users={users}
-          numUsers={numUsers}
-          userLeaving={userLeaving}
-        />
-        <MessageList
-          messages={messages}
-          hasMoreMessages={hasMoreMessages}
-          loadMore={this.loadMore}
-        />
-      </div>
+        <section className="feed">
+          <MessageList
+            messages={messages}
+            hasMoreMessages={hasMoreMessages}
+            loadMore={this.loadMore}
+          />
+          <UserList
+            users={users}
+            numUsers={numUsers}
+            userLeaving={userLeaving}
+          />
+        </section>
+      </section>
     );
   }
 }

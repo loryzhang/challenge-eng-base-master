@@ -39,10 +39,9 @@ class MessageInput extends Component {
 
   render() {
     return (
-      <div id="messageInput">
-        <input name="text" value={this.state.text} onKeyPress={this.sendOnEnter} onChange={this.handleInputChange} />
-        <button onClick={this.sendMessage}>Send</button>
-      </div>
+      <section className="send-message">
+        <input id="message-input" name="text" value={this.state.text} onKeyPress={this.sendOnEnter} onChange={this.handleInputChange} />
+      </section>
     );
   }
 }

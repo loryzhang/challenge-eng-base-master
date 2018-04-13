@@ -6,7 +6,7 @@ import Message from './Messsage';
 const MessageList = (props) => {
   const { messages, hasMoreMessages, loadMore } = props;
   return (
-    <div id="messageList">
+    <section id="message-list">
       <InfiniteScroll
         pageStart={0}
         loadMore={loadMore}
@@ -15,7 +15,7 @@ const MessageList = (props) => {
       >
         { messages.map(message => <Message message={message} key={message.id} />) }
       </InfiniteScroll>
-    </div>
+    </section>
   );
 };
 

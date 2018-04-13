@@ -6,9 +6,13 @@ import moment from 'moment';
 const Message = (props) => {
   const { text, user, ts } = props.message;
   return (
-    <div className="message">
-      <p><span>{user} sent: <span><Linkify>{text}</Linkify></span></span><span className="ts">{moment(ts * 1000).format('llll').toString()}</span></p>
-    </div>
+    <article className="message">
+      <div className="info">
+        <div className="username">{user}: </div>
+        <div className="ts">{moment(ts * 1000).format('llll').toString()}</div>
+      </div>
+      <div className="text"><Linkify>{text}</Linkify></div>
+    </article>
   );
 };
 

@@ -1,0 +1,147 @@
+@colorTheme: #6a5750;
+@colorThemeLight: #b5a397;
+@colorThemeDark: #26201e;
+@shadow: #f0eceb;
+@defaultRadius:0.25em;
+@borderColor: @colorThemeLight;
+
+*{
+  font-family: 'Montserrat', sans-serif;
+  padding: 0;
+  margin: 0;
+}
+
+
+button{
+  background-color: @colorTheme;
+  border-color: @borderColor;
+  font-size: 0.8em;
+  width: 8em;
+  height: 2em;
+  color: white;
+  -webkit-border-radius:@defaultRadius;
+     -moz-border-radius:@defaultRadius;
+          border-radius:@defaultRadius;
+};
+
+
+
+html, body, #root, #app{
+  height: 100%;
+  margin: 0;
+};
+
+#app {
+  background-color: #e6e1e1;
+};
+
+header{
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: @colorThemeDark;
+  height: 100px;
+  width: 100%;
+  color: @colorThemeLight;
+  
+  .greeting{
+    display: flex;
+    align-items: center;
+    p{
+      color: @colorThemeLight;
+    }
+    #logout{
+      display: block;
+      margin-left: 10px;
+      margin-right: 10px;
+    }
+  };
+};
+
+.login{
+  display: flex;
+  flex-direction: column;
+  height: 200px;
+  justify-content: space-around;
+  align-items: center;
+  input{
+    font-size: 1em;
+    border-radius: @defaultRadius;
+    height: 2em;
+    width: 10em;
+  }
+  .err{
+    color:@colorThemeDark;
+  }
+}
+
+  
+  
+#chat-box{
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  .notice{
+ 
+  }
+  .send-message {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    width: 99%;
+    height: 4em;
+    align-items: center;
+    input{
+    width: 99%;
+    height: 4em;
+    border-radius: @defaultRadius;
+    }
+  }
+  .feed{
+    display: flex;
+    width: 99%;
+    #user-list{
+      display: flex;
+      flex-direction: column;
+      width:20%;
+      margin: 0.5em;
+      em{
+        font-size: 1.2em;
+      }
+      li{
+        display: block;
+        margin-top: 0.25em;
+      }
+    }
+    #message-list{
+      display: flex;
+      flex-direction: column;
+      justify-content: space-around;
+      width:80%;
+      .message{
+        display: flex;
+        flex-direction: column;
+        padding: 0.5em;
+        margin: 0.5em;
+        border: 0.2em;
+        background: @shadow;
+        
+        .info{
+          display: flex;
+          justify-content: space-between;
+          margin-bottom: 0.25em;
+          font-size:0.8em;
+          color: @colorTheme;
+        }
+        .text{
+          color:@colorThemeDark;
+        }
+      }
+    }
+  }
+}
+
+  
+
+  
+  

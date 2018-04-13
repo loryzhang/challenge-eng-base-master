@@ -4,8 +4,8 @@ import axios from 'axios';
 import ChatBox from './ChatBox';
 
 // switch BACKEND_IP for local development envirment
-// const BACKEND_IP = 'http://backend:8000';
-const BACKEND_IP = 'http://localhost:18000';
+const BACKEND_IP = 'http://localhost:8000';
+// const BACKEND_IP = 'http://localhost:18000';
 axios.defaults.withCredentials = true;
 
 class App extends Component {
@@ -18,6 +18,7 @@ class App extends Component {
       err: null,
     };
     this.handleInputChange = this.handleInputChange.bind(this);
+    this.handleKeyPress = this.handleKeyPress.bind(this);
     this.connectSocket = this.connectSocket.bind(this);
     this.handleLogIn = this.handleLogIn.bind(this);
     this.handleLogOut = this.handleLogOut.bind(this);
@@ -109,6 +110,12 @@ class App extends Component {
     }
   }
 
+  handleKeyPress(e) {
+    if (e.key === 'Enter') {
+      this.handleLogIn();
+    }
+  }
+
   render() {
     const {
       err,
@@ -117,12 +124,18 @@ class App extends Component {
       logout_ts,
     } = this.state;
     return (
-      <div id="app">
-        <div id="header">
-          <h3>Chatter Box</h3>
+      <section id="app">
+        <header>
+          <div className="logo">
+            <h3>Chatter Box</h3>
+          </div>
           { user &&
-          <p>Welcome {user}!<span><button onClick={this.handleLogOut}>Log Out</button></span></p> }
-        </div>
+            <div className="greeting">
+              <p>Welcome {user}!</p>
+              <button id="logout" onClick={this.handleLogOut}>Log Out</button>
+            </div>
+          }
+        </header>
         { user ? <ChatBox
           user={user}
           missedMessagesCount={missedMessagesCount}
@@ -130,14 +143,14 @@ class App extends Component {
           socket={this.socket}
           handleLogOut={this.handleLogOut}
         /> :
-        <div id="login">
+        <section className="login">
           <input name="username" type="text" id="user" placeholder="username" onChange={this.handleInputChange} />
-          <input name="email" type="email" id="email" placeholder="email" onChange={this.handleInputChange} />
+          <input name="email" type="email" id="email" placeholder="email" onChange={this.handleInputChange} onKeyPress={this.handleKeyPress} />
           <button onClick={this.handleLogIn}>Log In</button>
           { err && <p className="err">{err}</p> }
-        </div>
+        </section>
         }
-      </div>
+      </section>
     );
   }
 }
