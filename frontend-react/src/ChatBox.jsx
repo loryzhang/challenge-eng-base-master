@@ -1,5 +1,6 @@
 import { ToastContainer, toast } from 'react-toastify';
 import React, { Component } from 'react';
+import { throttle } from 'lodash';
 import PropTypes from 'prop-types';
 import moment from 'moment';
 import axios from 'axios';
@@ -22,10 +23,12 @@ class ChatBox extends Component {
       missedMessagesCount,
       logout_ts,
       user,
+      scrolled: false,
     };
     this.socket = socket;
     this.addSocketEventListener();
     this.loadMore = this.loadMore.bind(this);
+    this.backToTop = this.backToTop.bind(this);
     // If server restart, socket will reconnect knowing who the user is
     setInterval(() => {
       this.socket.emit('pingUser', this.state.user);
@@ -42,6 +45,12 @@ class ChatBox extends Component {
     } else if (missedMessagesCount) {
       toast(`You've received ${missedMessagesCount} messages`, { autoClose: true });
     }
+    this.scroller = document.getElementById('scroller');
+    this.scroller.addEventListener('scroll', throttle(() => {
+      if (this.scroller.scrollTop > 100 && !this.state.scrolled) {
+        this.setState({ scrolled: true });
+      }
+    }, 2000), { leading: false });
   }
 
   componentWillUnmount() {
@@ -116,6 +125,11 @@ class ChatBox extends Component {
       });
   }
 
+  backToTop() {
+    this.scroller.scrollTop = 0;
+    this.setState({ scrolled: false });
+  }
+
   render() {
     const {
       user,
@@ -124,6 +138,7 @@ class ChatBox extends Component {
       users,
       messages,
       hasMoreMessages,
+      scrolled,
     } = this.state;
 
     return (
@@ -135,6 +150,8 @@ class ChatBox extends Component {
             messages={messages}
             hasMoreMessages={hasMoreMessages}
             loadMore={this.loadMore}
+            backToTop={this.backToTop}
+            scrolled={scrolled}
           />
           <UserList
             users={users}

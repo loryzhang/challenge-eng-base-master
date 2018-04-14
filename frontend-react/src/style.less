@@ -4,6 +4,9 @@
 @shadow: #f0eceb;
 @defaultRadius:0.25em;
 @borderColor: @colorThemeLight;
+@clientHeight: 1056px;
+@headerHeight: 100px;
+@footerHeight: 50px;
 
 *{
   font-family: 'Montserrat', sans-serif;
@@ -15,23 +18,27 @@
 button{
   background-color: @colorTheme;
   border-color: @borderColor;
+  color: white;
+  cursor: pointer;
   font-size: 0.8em;
   width: 8em;
   height: 2em;
-  color: white;
   -webkit-border-radius:@defaultRadius;
      -moz-border-radius:@defaultRadius;
           border-radius:@defaultRadius;
 };
 
-
+input{
+  border-radius: @defaultRadius;
+  outline-color: @colorTheme;
+}
 
 html, body, #root, #app{
   height: 100%;
   margin: 0;
 };
 
-#app {
+#root {
   background-color: #e6e1e1;
 };
 
@@ -40,10 +47,11 @@ header{
   justify-content: space-between;
   align-items: center;
   background-color: @colorThemeDark;
-  height: 100px;
+  height: @headerHeight;
   width: 100%;
   color: @colorThemeLight;
-  
+  position: fixed;
+
   .greeting{
     display: flex;
     align-items: center;
@@ -64,9 +72,10 @@ header{
   height: 200px;
   justify-content: space-around;
   align-items: center;
+  position: relative;
+  top: 100px;
   input{
     font-size: 1em;
-    border-radius: @defaultRadius;
     height: 2em;
     width: 10em;
   }
@@ -81,6 +90,10 @@ header{
   display: flex;
   flex-direction: column;
   align-items: center;
+  background-color: #e6e1e1;
+  position: relative;
+  height: 906px;
+  top: @headerHeight;
   .notice{
  
   }
@@ -94,7 +107,6 @@ header{
     input{
     width: 99%;
     height: 4em;
-    border-radius: @defaultRadius;
     }
   }
   .feed{
@@ -104,6 +116,8 @@ header{
       display: flex;
       flex-direction: column;
       width:20%;
+      height: 750px;
+      overflow: auto;
       margin: 0.5em;
       em{
         font-size: 1.2em;
@@ -118,6 +132,20 @@ header{
       flex-direction: column;
       justify-content: space-around;
       width:80%;
+      height: 750px;
+      button{
+        background-color: transparent;
+        border-color: transparent;
+        outline: none;
+        margin: 0.5em;
+        padding: 0.5em;
+        width: 100%;
+        color: @colorTheme;
+      }
+      #scroller{
+        height: 99%;
+        overflow: auto;
+      }
       .message{
         display: flex;
         flex-direction: column;
@@ -135,13 +163,26 @@ header{
         }
         .text{
           color:@colorThemeDark;
+          word-wrap: break-word;
         }
       }
     }
   }
 }
 
-  
+footer{
+  display: flex;
+  justify-content: center;
+  background-color: @colorThemeDark;
+  color: @colorThemeLight;
+  position:fixed;
+  bottom: 0;
+  height: @footerHeight;
+  width: 100%;
+  #footer{
+    margin: auto 0;
+  }
+}
 
   
   
