@@ -68,7 +68,7 @@ class App extends Component {
             </div>
           }
         </header>
-        { user ? <ChatBox
+        { this.props.user ? <ChatBox
           user={user}
           missedMessagesCount={missedMessagesCount}
           logout_ts={logout_ts}

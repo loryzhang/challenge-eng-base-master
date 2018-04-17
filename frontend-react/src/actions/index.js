@@ -12,29 +12,30 @@ const events = [
 ];
 const connectionOptions = { transports: ['websocket'] };
 const socket = io(BACKEND_IP, connectionOptions);
-console.log(socket);
-// socket.on('connect', () => {
-//   console.log('connect to socket');
-// });
-
-export const emit = (type, data) => (dispatch) => {
-  console.log('hi');
-  socket.emit(type, data, payload =>
-    dispatch({
-      type,
-      payload,
-    }));
-};
 
 export const initSocket = (user, dispatch) => {
-  console.log('hi', socket);
   socket.on('connect', () => {
     console.log('connect to socket');
+  });
+  socket.emit('fetchMessages', null, (data) => {
+    dispatch({
+      type: 'fetchMessages',
+      payload: data,
+    });
   });
   setInterval(() => {
     socket.emit('pingUser', user);
   }, 1000);
   events.forEach(type => socket.on(type, payload => dispatch({ type, payload })));
+};
+
+export const emit = (type, data) => (dispatch) => {
+  console.log('emit', emit);
+  socket.emit(type, data, payload =>
+    dispatch({
+      type,
+      payload,
+    }));
 };
 
 export const checkSession = () => (dispatch) => {

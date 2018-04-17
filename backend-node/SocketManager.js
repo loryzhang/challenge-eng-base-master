@@ -68,6 +68,7 @@ module.exports = (socket) => {
   });
 
   socket.on('fetchMessages', (data, fn) => {
+    console.log(data, fn);
     redis.lrange('messages', 0, -1, (err, messages) => {
       if (err) {
         console.error(err);
