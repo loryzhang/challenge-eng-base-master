@@ -3,29 +3,30 @@ const { insertMessageToDb, saveLogOutToDb } = require('./db');
 const { MESSAGE_LIMIT_IN_CACHE } = require('./constants');
 
 module.exports = (socket) => {
-  socket.on('addUser', (username) => {
+  socket.on('fetchUsers', (username, fn) => {
+    console.log('fetch');
     socket.user = username;
     redis.sismember('users', username, (error, joined) => {
       if (error) {
         console.error(error);
-        return;
+      } else if (!joined) {
+        socket.broadcast.emit('userJoined', username);
+      } else {
+        redis.sadd('users', username, (err) => {
+          if (err) {
+            console.error(err);
+          } else {
+            redis.smembers('users', (err, users) => {
+              if (err) {
+                console.error(err);
+              } else {
+                console.log(users);
+                fn(users);
+              }
+            });
+          }
+        });
       }
-      redis.sadd('users', username, (err) => {
-        if (err) {
-          console.error(err);
-        }
-      });
-      socket.broadcast.emit('userJoined', username, joined);
-    });
-  });
-
-  socket.on('sendUsers', () => {
-    redis.smembers('users', (err, users) => {
-      if (err) {
-        console.error(err);
-        return;
-      }
-      socket.emit('getUsers', users);
     });
   });
 
@@ -66,18 +67,20 @@ module.exports = (socket) => {
     });
   });
 
-  socket.on('fetchMessages', () => {
+  socket.on('fetchMessages', (data, fn) => {
     redis.lrange('messages', 0, -1, (err, messages) => {
       if (err) {
         console.error(err);
-        return;
+      } else {
+        const pasedMsgs = messages.map(message => JSON.parse(message));
+        fn(pasedMsgs);
       }
-      const pasedMsgs = messages.map(message => JSON.parse(message));
-      socket.emit('receiveMsgs', pasedMsgs);
+      // socket.emit('receiveMsgs', pasedMsgs);
     });
   });
 
   socket.on('pingUser', (user) => {
+    console.log('hii');
     socket.user = user;
   });
 

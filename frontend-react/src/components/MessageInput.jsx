@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
+import { emit } from '../actions';
 
 class MessageInput extends Component {
   constructor(props) {
@@ -8,7 +9,6 @@ class MessageInput extends Component {
       text: '',
       user: this.props.user,
     };
-    this.socket = this.props.socket;
     this.sendMessage = this.sendMessage.bind(this);
     this.handleInputChange = this.handleInputChange.bind(this);
     this.sendOnEnter = this.sendOnEnter.bind(this);
@@ -33,7 +33,7 @@ class MessageInput extends Component {
       return;
     }
     const message = { text, user };
-    this.socket.emit('sendMessage', message);
+    emit('sendMessage', message);
     this.setState({ text: '' });
   }
 
@@ -47,7 +47,6 @@ class MessageInput extends Component {
 }
 
 MessageInput.propTypes = {
-  socket: PropTypes.object.isRequired,
   user: PropTypes.string.isRequired,
 };
 
