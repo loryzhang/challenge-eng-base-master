@@ -5,6 +5,23 @@ import { initSocket, emit, disconnectSocket } from './socket';
 const BACKEND_IP = 'http://localhost:8000';
 axios.defaults.withCredentials = true;
 
+const loginSuccess = (data, dispatch) => {
+  initSocket(data.user, dispatch);
+  emit(fetchMessages, null, dispatch);
+  emit(fetchUsers, data.user, dispatch);
+  dispatch({
+    type: LOG_IN_SUCCEED,
+    payload: data,
+  });
+};
+
+const loginFailed = (message, dispatch) => {
+  dispatch({
+    type: LOG_IN_FAILED,
+    payload: message,
+  });
+};
+
 export const checkSession = () => (dispatch) => {
   axios({
     method: 'get',
@@ -15,16 +32,9 @@ export const checkSession = () => (dispatch) => {
         return;
       }
       if (data.message) {
-        dispatch({
-          type: LOG_IN_FAILED,
-          payload: data.message,
-        });
+        loginFailed(data.message, dispatch);
       } else {
-        initSocket(data.user, dispatch);
-        dispatch({
-          type: LOG_IN_SUCCEED,
-          payload: data,
-        });
+        loginSuccess(data, dispatch);
       }
     })
     .catch((err) => {
@@ -40,16 +50,9 @@ export const logIn = userData => (dispatch) => {
   })
     .then(({ data }) => {
       if (data.message) {
-        dispatch({
-          type: LOG_IN_FAILED,
-          payload: data.message,
-        });
+        loginFailed(data.message, dispatch);
       } else {
-        initSocket(data.user, dispatch);
-        dispatch({
-          type: LOG_IN_SUCCEED,
-          payload: data,
-        });
+        loginSuccess(data, dispatch);
       }
     })
     .catch((err) => {
@@ -91,11 +94,6 @@ export const loadMore = earliestMessageTS => (dispatch) => {
     .catch((err) => {
       console.error(err);
     });
-};
-
-export const fetch = user => (dispatch) => {
-  emit(fetchMessages, null, dispatch);
-  emit(fetchUsers, user, dispatch);
 };
 
 export const send = message => (dispatch) => {

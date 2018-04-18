@@ -7,7 +7,8 @@ module.exports = {
   fetchUsers: 'fetchUsers',
   pingUser: 'pingUser',
   updateMessage: 'updateMessage',
+  updateUsers: 'updateUsers',
   userJoined: 'userJoined',
-  removeUser: 'removeUser',
+  userLeft: 'userLeft',
   sendMessage: 'sendMessage',
 };

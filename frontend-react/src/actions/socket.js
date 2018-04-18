@@ -3,8 +3,9 @@ import io from 'socket.io-client';
 const BACKEND_IP = 'http://localhost:8000';
 const events = [
   'userJoined',
-  'removeUser',
+  'userLeft',
   'updateMessage',
+  'updateUsers',
 ];
 const connectionOptions = { transports: ['websocket'] };
 const socket = io(BACKEND_IP, connectionOptions);
@@ -17,7 +18,6 @@ export const initSocket = (user, dispatch) => {
     socket.emit('pingUser', user);
   }, 1000);
   events.forEach(type => socket.on(type, (payload) => {
-    console.log('socket on ', type);
     dispatch({ type, payload });
   }));
 };

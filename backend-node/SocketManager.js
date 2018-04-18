@@ -26,6 +26,17 @@ module.exports = (socket) => {
     });
   });
 
+  socket.on('fetchMessages', (data, fn) => {
+    redis.lrange('messages', 0, -1, (err, messages) => {
+      if (err) {
+        console.error(err);
+      } else {
+        const parsedMsgs = messages.map(message => JSON.parse(message));
+        fn(parsedMsgs);
+      }
+    });
+  });
+
   socket.on('sendMessage', (message) => {
     message.ts = Math.floor(Date.now() / 1000);
     redis.lpush('messages', JSON.stringify(message), (error) => {
@@ -44,32 +55,29 @@ module.exports = (socket) => {
     });
   });
 
-  socket.on('fetchMessages', (data, fn) => {
-    redis.lrange('messages', 0, -1, (err, messages) => {
-      if (err) {
-        console.error(err);
-      } else {
-        const pasedMsgs = messages.map(message => JSON.parse(message));
-        fn(pasedMsgs);
-      }
-    });
-  });
-
   socket.on('pingUser', (user) => {
     socket.user = user;
   });
 
   socket.on('disconnect', () => {
-    redis.srem('users', socket.user, (err) => {
+    redis.srem('users', socket.user, (err, userExisted) => {
       if (err) {
         console.error(err);
-      }
-    });
-    socket.broadcast.emit('removeUser', socket.user);
-    const logout_ts = Math.floor(Date.now() / 1000);
-    saveLogOutToDb(socket.user, logout_ts, (err) => {
-      if (err) {
-        console.error(err);
+      } else if (userExisted) {
+        socket.broadcast.emit('userLeft', socket.user);
+        redis.smembers('users', (error, users) => {
+          if (error) {
+            console.error(error);
+          } else {
+            socket.broadcast.emit('updateUsers', users);
+          }
+        });
+        const logout_ts = Math.floor(Date.now() / 1000);
+        saveLogOutToDb(socket.user, logout_ts, (error) => {
+          if (error) {
+            console.error(error);
+          }
+        });
       }
     });
   });

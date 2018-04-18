@@ -65,8 +65,6 @@ class App extends Component {
           messages={this.props.messages}
           user={this.props.user}
           users={this.props.users}
-          missedMessagesCount={this.props.missedMessagesCount}
-          logout_ts={this.props.logout_ts}
           hasMoreMessages={this.props.hasMoreMessages}
           handleLogOut={this.handleLogOut}
         /> :
@@ -86,8 +84,6 @@ const mapStateToProps = state => ({
   err: state.err,
   user: state.user,
   users: state.users,
-  missedMessagesCount: state.missedMessagesCount,
-  logout_ts: state.logout_ts,
   messages: state.messages,
   hasMoreMessages: state.hasMoreMessages,
 });
@@ -98,8 +94,6 @@ App.propTypes = {
   messages: PropTypes.array.isRequired,
   users: PropTypes.array.isRequired,
   hasMoreMessages: PropTypes.bool.isRequired,
-  missedMessagesCount: PropTypes.string.isRequired,
-  logout_ts: PropTypes.number.isRequired,
   checkSession: PropTypes.func.isRequired,
   logOut: PropTypes.func.isRequired,
   logIn: PropTypes.func.isRequired,
