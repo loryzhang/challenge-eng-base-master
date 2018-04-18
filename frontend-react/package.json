@@ -42,7 +42,7 @@
     "webpack-dev-server": "^2.11.1"
   },
   "scripts": {
-    "start": "react-scripts start",
+    "start": "webpack-dev-server --watch",
     "build": "react-scripts build",
     "test": "react-scripts test --env=jsdom",
     "eject": "react-scripts eject",
