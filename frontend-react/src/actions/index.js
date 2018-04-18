@@ -2,7 +2,10 @@ import axios from 'axios';
 import { LOG_IN_SUCCEED, LOG_IN_FAILED, LOG_OUT, LOAD_MORE, fetchMessages, fetchUsers, sendMessage } from '../constants';
 import { initSocket, emit, disconnectSocket } from './socket';
 
-const BACKEND_IP = 'http://localhost:8000';
+const BACKEND_IP = 'http://localhost:18000';
+// for local devleopment:
+// const BACKEND_IP = 'http://localhost:8000';
+
 axios.defaults.withCredentials = true;
 
 const loginSuccess = (data, dispatch) => {
