@@ -4,29 +4,25 @@ const { MESSAGE_LIMIT_IN_CACHE } = require('./constants');
 
 module.exports = (socket) => {
   socket.on('fetchUsers', (username, fn) => {
-    console.log('fetch');
     socket.user = username;
     redis.sismember('users', username, (error, joined) => {
       if (error) {
         console.error(error);
       } else if (!joined) {
         socket.broadcast.emit('userJoined', username);
-      } else {
         redis.sadd('users', username, (err) => {
           if (err) {
             console.error(err);
-          } else {
-            redis.smembers('users', (err, users) => {
-              if (err) {
-                console.error(err);
-              } else {
-                console.log(users);
-                fn(users);
-              }
-            });
           }
         });
       }
+      redis.smembers('users', (err, users) => {
+        if (err) {
+          console.error(err);
+        } else {
+          fn(users);
+        }
+      });
     });
   });
 
@@ -37,26 +33,7 @@ module.exports = (socket) => {
         console.error(error);
         return;
       }
-      redis.get('messageCountInCache', (err, counts) => {
-        if (err) {
-          console.error(err);
-          return;
-        }
-        // mantaining massage limit in cache
-        if (counts >= MESSAGE_LIMIT_IN_CACHE) {
-          redis.rpop('messages', (popError) => {
-            if (popError) {
-              console.error(popError);
-            }
-          });
-        } else {
-          redis.incr('messageCountInCache', (incError) => {
-            if (incError) {
-              console.error(incError);
-            }
-          });
-        }
-      });
+      redis.LTRIM('messages', 0, MESSAGE_LIMIT_IN_CACHE);
       socket.emit('updateMessage', message);
       socket.broadcast.emit('updateMessage', message);
     });
@@ -68,7 +45,6 @@ module.exports = (socket) => {
   });
 
   socket.on('fetchMessages', (data, fn) => {
-    console.log(data, fn);
     redis.lrange('messages', 0, -1, (err, messages) => {
       if (err) {
         console.error(err);
@@ -76,12 +52,10 @@ module.exports = (socket) => {
         const pasedMsgs = messages.map(message => JSON.parse(message));
         fn(pasedMsgs);
       }
-      // socket.emit('receiveMsgs', pasedMsgs);
     });
   });
 
   socket.on('pingUser', (user) => {
-    console.log('hii');
     socket.user = user;
   });
 

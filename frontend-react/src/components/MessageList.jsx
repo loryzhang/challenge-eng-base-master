@@ -1,17 +1,27 @@
 import React from 'react';
 import InfiniteScroll from 'react-infinite-scroller';
+import { connect } from 'react-redux';
 import PropTypes from 'prop-types';
 import Message from './Messsage';
+import { loadMore } from '../actions';
 
 const MessageList = (props) => {
-  const { messages, hasMoreMessages, loadMore, scrolled, backToTop } = props;
+  const { messages, hasMoreMessages, scrolled, backToTop } = props;
+  const loadMoreMessages = () => {
+    if (!messages.length) {
+      return;
+    }
+    const earliestMessageInState = messages[messages.length - 1];
+    const earliestMessageTS = earliestMessageInState.ts;
+    props.loadMore(earliestMessageTS);
+  };
   return (
     <section id="message-list">
       { scrolled && <button onClick={backToTop}>Click To Top</button> }
       <InfiniteScroll
         id="scroller"
         pageStart={0}
-        loadMore={loadMore}
+        loadMore={loadMoreMessages}
         hasMore={hasMoreMessages}
         loader={<div className="loader" key="loader">Loading ...</div>}
       >
@@ -23,10 +33,10 @@ const MessageList = (props) => {
 
 MessageList.propTypes = {
   messages: PropTypes.array.isRequired,
-  hasMoreMessages: PropTypes.bool.isRequired,
   loadMore: PropTypes.func.isRequired,
+  hasMoreMessages: PropTypes.bool.isRequired,
   scrolled: PropTypes.bool.isRequired,
   backToTop: PropTypes.func.isRequired,
 };
 
-export default MessageList;
+export default connect(null, { loadMore })(MessageList);

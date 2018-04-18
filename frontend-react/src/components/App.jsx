@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import { connect } from 'react-redux';
 import PropTypes from 'prop-types';
 import ChatBox from './ChatBox';
-import { checkSession, logIn, logOut, emit, loadMore } from '../actions';
+import { checkSession, logIn, logOut } from '../actions';
 
 class App extends Component {
   constructor(props) {
@@ -48,37 +48,33 @@ class App extends Component {
   }
 
   render() {
-    console.log(this.props);
-    const {
-      err,
-      user,
-      missedMessagesCount,
-      logout_ts,
-    } = this.props;
     return (
       <section id="app">
         <header>
           <div className="logo">
             <h3>Chatter Box</h3>
           </div>
-          { user &&
+          { this.props.user &&
             <div className="greeting">
-              <p>Welcome {user}!</p>
+              <p>Welcome {this.props.user}!</p>
               <button id="logout" onClick={this.handleLogOut}>Log Out</button>
             </div>
           }
         </header>
         { this.props.user ? <ChatBox
-          user={user}
-          missedMessagesCount={missedMessagesCount}
-          logout_ts={logout_ts}
+          messages={this.props.messages}
+          user={this.props.user}
+          users={this.props.users}
+          missedMessagesCount={this.props.missedMessagesCount}
+          logout_ts={this.props.logout_ts}
+          hasMoreMessages={this.props.hasMoreMessages}
           handleLogOut={this.handleLogOut}
         /> :
         <section className="login">
           <input name="username" type="text" id="user" placeholder="username" onChange={this.handleInputChange} />
           <input name="email" type="email" id="email" placeholder="email" onChange={this.handleInputChange} onKeyPress={this.handleKeyPress} />
           <button onClick={this.handleLogIn}>Log In</button>
-          { err && <p className="err">{err}</p> }
+          { this.props.err && <p className="err">{this.props.err}</p> }
         </section>
         }
       </section>
@@ -89,13 +85,19 @@ class App extends Component {
 const mapStateToProps = state => ({
   err: state.err,
   user: state.user,
+  users: state.users,
   missedMessagesCount: state.missedMessagesCount,
   logout_ts: state.logout_ts,
+  messages: state.messages,
+  hasMoreMessages: state.hasMoreMessages,
 });
 
 App.propTypes = {
   err: PropTypes.string.isRequired,
   user: PropTypes.string.isRequired,
+  messages: PropTypes.array.isRequired,
+  users: PropTypes.array.isRequired,
+  hasMoreMessages: PropTypes.bool.isRequired,
   missedMessagesCount: PropTypes.string.isRequired,
   logout_ts: PropTypes.number.isRequired,
   checkSession: PropTypes.func.isRequired,
@@ -103,4 +105,4 @@ App.propTypes = {
   logIn: PropTypes.func.isRequired,
 };
 
-export default connect(mapStateToProps, { checkSession, logIn, logOut })(App);
+export default connect(mapStateToProps, { logIn, checkSession, logOut })(App);

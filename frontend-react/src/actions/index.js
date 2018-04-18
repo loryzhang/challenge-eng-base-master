@@ -1,42 +1,9 @@
 import axios from 'axios';
-import io from 'socket.io-client';
-import { LOG_IN_SUCCEED, LOG_IN_FAILED, LOG_OUT, LOAD_MORE } from '../constants';
-// import { initSocket } from './socket';
+import { LOG_IN_SUCCEED, LOG_IN_FAILED, LOG_OUT, LOAD_MORE, fetchMessages, fetchUsers, sendMessage } from '../constants';
+import { initSocket, emit, disconnectSocket } from './socket';
 
 const BACKEND_IP = 'http://localhost:8000';
 axios.defaults.withCredentials = true;
-const events = [
-  'userJoined',
-  'removeUser',
-  'updateMessage',
-];
-const connectionOptions = { transports: ['websocket'] };
-const socket = io(BACKEND_IP, connectionOptions);
-
-export const initSocket = (user, dispatch) => {
-  socket.on('connect', () => {
-    console.log('connect to socket');
-  });
-  socket.emit('fetchMessages', null, (data) => {
-    dispatch({
-      type: 'fetchMessages',
-      payload: data,
-    });
-  });
-  setInterval(() => {
-    socket.emit('pingUser', user);
-  }, 1000);
-  events.forEach(type => socket.on(type, payload => dispatch({ type, payload })));
-};
-
-export const emit = (type, data) => (dispatch) => {
-  console.log('emit', emit);
-  socket.emit(type, data, payload =>
-    dispatch({
-      type,
-      payload,
-    }));
-};
 
 export const checkSession = () => (dispatch) => {
   axios({
@@ -91,8 +58,7 @@ export const logIn = userData => (dispatch) => {
 };
 
 export const logOut = user => (dispatch) => {
-  socket.emit('disconnect', user);
-  socket.disconnect();
+  disconnectSocket(user);
   axios({
     method: 'post',
     url: `${BACKEND_IP}/logout`,
@@ -126,3 +92,13 @@ export const loadMore = earliestMessageTS => (dispatch) => {
       console.error(err);
     });
 };
+
+export const fetch = user => (dispatch) => {
+  emit(fetchMessages, null, dispatch);
+  emit(fetchUsers, user, dispatch);
+};
+
+export const send = message => (dispatch) => {
+  emit(sendMessage, message, dispatch);
+};
+

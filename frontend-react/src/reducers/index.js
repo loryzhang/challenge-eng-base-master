@@ -31,16 +31,16 @@ const rootReducer = (state = initialState, { type, payload }) => {
     case LOAD_MORE:
       return {
         hasMoreMessages: payload.hasMoreMessages,
-        messages: [...state.messages, ...payload.hasMoreMessages],
+        messages: [...state.messages, ...payload.moreMessages],
       };
     case fetchMessages:
-      console.log('payload', payload);
       return {
         ...state,
         messages: [...payload],
       };
     case fetchUsers:
       return {
+        ...state,
         users: [...payload],
       };
     case updateMessage:
@@ -56,6 +56,7 @@ const rootReducer = (state = initialState, { type, payload }) => {
       };
     case removeUser:
       return {
+        ...state,
         userLeft: payload,
       };
     default:

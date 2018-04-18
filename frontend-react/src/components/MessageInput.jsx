@@ -1,13 +1,13 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-import { emit } from '../actions';
+import { connect } from 'react-redux';
+import { send } from '../actions';
 
 class MessageInput extends Component {
   constructor(props) {
     super(props);
     this.state = {
       text: '',
-      user: this.props.user,
     };
     this.sendMessage = this.sendMessage.bind(this);
     this.handleInputChange = this.handleInputChange.bind(this);
@@ -27,13 +27,13 @@ class MessageInput extends Component {
   }
 
   sendMessage() {
-    const { text, user } = this.state;
+    const { text } = this.state;
     if (!text.length) {
       // no event will be triggered if the input is empty
       return;
     }
-    const message = { text, user };
-    emit('sendMessage', message);
+    const message = { text, user: this.props.user };
+    this.props.send(message);
     this.setState({ text: '' });
   }
 
@@ -48,6 +48,7 @@ class MessageInput extends Component {
 
 MessageInput.propTypes = {
   user: PropTypes.string.isRequired,
+  send: PropTypes.func.isRequired,
 };
 
-export default MessageInput;
+export default connect(null, { send })(MessageInput);

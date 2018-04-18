@@ -29,7 +29,6 @@ fetchMessagesFromDbToCache((err, messages) => {
     console.error(err);
     return;
   }
-  client.set('messageCountInCache', messages.length);
   Array.from(messages).forEach((message) => {
     multiMsgs.lpush('messages', JSON.stringify(message));
   });
