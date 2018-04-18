@@ -1,3 +1,4 @@
+// constants for running docker
 module.exports = {
   DB_HOST: process.env.DB_HOST || 'db',
   DB_USER: process.env.DB_USER || 'root',

@@ -1,8 +1,9 @@
 import io from 'socket.io-client';
 
+// for Docker:
+const BACKEND_IP = 'http://localhost:18000';
 // for local devleopment:
 // const BACKEND_IP = 'http://localhost:8000';
-const BACKEND_IP = 'http://localhost:18000';
 
 const events = [
   'userJoined',

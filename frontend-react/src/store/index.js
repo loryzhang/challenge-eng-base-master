@@ -10,6 +10,7 @@ const store = createStore(
   undefined,
   compose(
     applyMiddleware(...middleware),
+    // Debug tool extension in Chrome:
     // window.__REDUX_DEVTOOLS_EXTENSION__ && window.__REDUX_DEVTOOLS_EXTENSION__(),
   ),
 );

@@ -58,6 +58,7 @@ const rootReducer = (state = initialState, { type, payload }) => {
       toast(`${payload} just joined`);
       return {
         ...state,
+        users: [payload, ...state.users],
       };
     case userLeft:
       toast(`${payload} just left`);

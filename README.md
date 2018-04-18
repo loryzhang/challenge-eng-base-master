@@ -12,7 +12,9 @@ compose db first and make sure db is ready before compose fullstack
 ### Not use docker
 - make sure you have MySQL and Redis installed
 - configure the connection params in backend-node/constants.js
+- configure BACKEND_IP in frontend-react/src/actions/index.js and frontend-react/src/actions/socket.js
 - npm install 
+- go to front-end and run npm start
 - go to backend-node/ and run npm install
 - run node app.js
 - in frontend-react/src/App.jsx & frontend-react/src/ChatBox.jsx, switch BACKEND_IP to 'http://localhost:8000'
