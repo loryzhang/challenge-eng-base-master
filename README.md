@@ -7,25 +7,23 @@ Fork the repo and clone to local repository
 compose db first and make sure db is ready before compose fullstack
 - "docker-compose up db"
 - Please wait 30s after db is up, then run "docker-compose up fullstack"
-- go to: http:// localhost:13000
+- go to: http://localhost:13000
 
 ### Not use docker
-- make sure you have MySQL and Redis installed
-- configure the connection params in backend-node/constants.js
-- configure BACKEND_IP in frontend-react/src/actions/index.js and frontend-react/src/actions/socket.js
-- npm install 
-- go to front-end and run npm start
-- go to backend-node/ and run npm install
+- make sure you have MySQL and Redis installed in your local environment and start services
+- open a terminal, go to frontend-react folder and run npm install
+- uncomment the right BACKEND_IP in frontend-react/src/actions/index.js and frontend-react/src/actions/socket.js for local development
+- run npm start
+- open another terminal, go to backend-node/ and run npm install
 - run node app.js
-- in frontend-react/src/App.jsx & frontend-react/src/ChatBox.jsx, switch BACKEND_IP to 'http://localhost:8000'
-- run npm start and it will open a window on browser 'http://localhost:3000'
+- open a window on browser, go to 'http://localhost:3000'
 
 ## Test
 - npm install --save jest
 - Run 'jest' in terminal
 
 ## Overview & Assumptions
-Build real- time chat app (MVP)
+Build real-time chat app (MVP)
 - A single-room chatterbox
 - Need to have persistent database
 - Scalable and flexible system
